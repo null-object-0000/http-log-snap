@@ -56,6 +56,9 @@ public class TextHttpLogFormatter implements HttpLogFormatter {
             logs.append(buildResponseLogs(data));
         }
 
+        // 扩展信息
+        appendContextExtras(logs, data.getTiming(), data.getContext());
+
         return logs.toString();
     }
 
@@ -103,9 +106,6 @@ public class TextHttpLogFormatter implements HttpLogFormatter {
         HttpTiming timing = data.getTiming();
         HttpLogContext context = data.getContext();
 
-        // 扩展信息（最前面）
-        appendContextExtras(logs, timing, context);
-
         // 开始标题
         logs.line().append(getEventTime(timing, HttpEvent.START)).space().append("--- START [SERVER]");
 
@@ -137,9 +137,6 @@ public class TextHttpLogFormatter implements HttpLogFormatter {
         HttpTiming timing = data.getTiming();
         HttpLogData.Request request = data.getRequest();
         HttpLogContext context = data.getContext();
-
-        // 扩展信息（最前面）
-        appendContextExtras(logs, timing, context);
 
         // 开始标题
         logs.line().append(getEventTime(timing, HttpEvent.START)).space().append("--- START");
@@ -186,7 +183,7 @@ public class TextHttpLogFormatter implements HttpLogFormatter {
         }
         String time = getEventTime(timing, HttpEvent.START);
         String json = JSON.toJSONString(context.getExtras());
-        logs.line().append(time).space().appendLine("--- LOG EXTRAS -------------------------------------------------------").append(json);
+        logs.append(time).space().appendLine("--- LOG EXTRAS -------------------------------------------------------").append(json);
     }
 
     // ==================== 日志构建 - 连接阶段 ====================
@@ -276,7 +273,6 @@ public class TextHttpLogFormatter implements HttpLogFormatter {
             String value = headersToRedact.contains(name) ? "██" : headers.value(i);
             logs.appendKeyValueLine(name, value);
         }
-        logs.line();
     }
 
     private void appendRequestBody(LogStringBuilder logs, HttpLogData data) {
@@ -306,9 +302,12 @@ public class TextHttpLogFormatter implements HttpLogFormatter {
         } else if (request.isOneShot()) {
             logs.append(endTime).space().appendLine("--> END REQUEST (%s, one-shot body omitted)", requestTime);
         } else {
-            logs.appendLine(request.getBody());
-            logs.append(endTime).space();
+            String body = request.getBody();
+            if (isNotBlank(body)) {
+                logs.line().appendLine(body);
+            }
 
+            logs.append(endTime).space();
             int bodySize = request.getBody().getBytes(StandardCharsets.UTF_8).length;
             if ("gzip".equalsIgnoreCase(request.getHeaders().get("Content-Encoding"))) {
                 logs.appendLine("--> END REQUEST (%s, %d-byte, %d-gzipped-byte body)",
@@ -389,7 +388,7 @@ public class TextHttpLogFormatter implements HttpLogFormatter {
             // 输出响应体
             String body = resp.getBody();
             if (isNotBlank(body)) {
-                logs.append(body);
+                logs.line().append(body);
             }
 
             HttpTiming timing = data.getTiming();

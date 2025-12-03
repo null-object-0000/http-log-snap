@@ -53,10 +53,10 @@ public class HttpLoggingAutoConfiguration {
         filter.setMaxPayloadLength(properties.getMaxPayloadLength());
 
         // 配置格式化器（TextHttpLogFormatter 会根据 HttpDirection 自动选择格式）
-        if ("text".equalsIgnoreCase(properties.getFormat())) {
-            filter.setFormatter(new TextHttpLogFormatter());
-        } else {
+        if ("json".equalsIgnoreCase(properties.getFormat())) {
             filter.setFormatter(new JsonHttpLogFormatter());
+        } else {
+            filter.setFormatter(new TextHttpLogFormatter());
         }
 
         // 配置脱敏头
@@ -138,7 +138,7 @@ public class HttpLoggingAutoConfiguration {
         /**
          * 日志格式：json 或 text
          */
-        private String format = "json";
+        private String format = "text";
 
         /**
          * 需要脱敏的请求头名称

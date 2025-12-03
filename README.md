@@ -187,7 +187,9 @@ HttpRequestLogger.setDefaultOutput(CompositeLogOutput.of(
 
 - [📖 使用指南](docs/guide.md) - 完整的使用教程
 - [🔧 高级用法](docs/advanced.md) - 自定义格式化器、输出目标、适配器
-- 💡 接入示例 - 在 IDE 中直接运行 `src/test/java/.../demo/OkHttpClientDemo.java`
+- 💡 接入示例 - 在 IDE 中直接运行：
+  - OkHttp 客户端: `src/test/java/.../demo/OkHttpClientDemo.java`
+  - Spring Boot 服务端: `src/test/java/.../demo/SpringBootServerDemo.java`
 
 ## 🤝 贡献
 

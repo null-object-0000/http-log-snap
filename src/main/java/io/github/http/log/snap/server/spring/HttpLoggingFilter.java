@@ -424,8 +424,15 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
     }
 
     private Charset getCharset(HttpServletResponse response) {
+        // JSON 类型强制使用 UTF-8（RFC 8259）
+        String contentType = response.getContentType();
+        if (contentType != null && contentType.contains("application/json")) {
+            return StandardCharsets.UTF_8;
+        }
+        
         String encoding = response.getCharacterEncoding();
-        if (encoding != null) {
+        if (encoding != null && !encoding.equalsIgnoreCase("ISO-8859-1")) {
+            // 忽略 Tomcat 默认的 ISO-8859-1，使用 UTF-8
             try {
                 return Charset.forName(encoding);
             } catch (Exception ignored) {

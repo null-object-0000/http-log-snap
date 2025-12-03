@@ -129,7 +129,7 @@ public class HttpRequestLogger {
      */
     public HttpRequestLogger(HttpDirection direction, HttpLogContext context) {
         this.direction = direction;
-        this.context = context;
+        this.context = context != null ? context : new HttpLogContext();
     }
 
     /**
