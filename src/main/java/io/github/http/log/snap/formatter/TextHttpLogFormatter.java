@@ -48,10 +48,6 @@ public class TextHttpLogFormatter implements HttpLogFormatter {
                     ? getEventTime(data.getTiming(), HttpEvent.HANDLER_EXCEPTION, HttpEvent.RESPONSE_FAILED)
                     : getEventTime(data.getTiming(), HttpEvent.RESPONSE_FAILED, HttpEvent.CONNECT_FAILED);
             logs.appendLine("%s <-- HTTP FAILED", time);
-            Throwable exception = data.getException();
-            if (exception != null) {
-                logs.appendLine("    %s: %s", exception.getClass().getSimpleName(), exception.getMessage());
-            }
         } else if (data.getResponse() != null) {
             logs.append(buildResponseLogs(data));
         }

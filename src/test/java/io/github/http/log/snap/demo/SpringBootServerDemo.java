@@ -95,5 +95,14 @@ public class SpringBootServerDemo {
                 "message", "订单创建成功"
         );
     }
+
+    /**
+     * 异常测试接口
+     * GET http://localhost:8080/api/error
+     */
+    @GetMapping("/api/error")
+    public Map<String, Object> testError() {
+        throw new RuntimeException("测试异常：业务处理失败");
+    }
 }
 

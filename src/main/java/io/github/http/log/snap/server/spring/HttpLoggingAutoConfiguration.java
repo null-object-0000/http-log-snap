@@ -99,6 +99,12 @@ public class HttpLoggingAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean(HttpLoggingExceptionHandler.class)
+    public HttpLoggingExceptionHandler httpLoggingExceptionHandler() {
+        return new HttpLoggingExceptionHandler();
+    }
+
+    @Bean
     @ConditionalOnClass(name = "org.springframework.web.servlet.config.annotation.WebMvcConfigurer")
     public WebMvcConfigurer httpLoggingWebMvcConfigurer(HttpLoggingHandlerInterceptor interceptor) {
         return new WebMvcConfigurer() {

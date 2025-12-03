@@ -179,40 +179,40 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
             customizer.customize(logger, request);
         }
 
+        // 包装请求和响应以支持多次读取
+        CachedBodyHttpServletRequest wrappedRequest = new CachedBodyHttpServletRequest(request);
+        CachedBodyHttpServletResponse wrappedResponse = new CachedBodyHttpServletResponse(response);
+
         try {
             // 开始记录
             logger.start();
-
-            // 包装请求和响应以支持多次读取
-            CachedBodyHttpServletRequest wrappedRequest = new CachedBodyHttpServletRequest(request);
-            CachedBodyHttpServletResponse wrappedResponse = new CachedBodyHttpServletResponse(response);
 
             // 记录请求信息
             recordRequest(logger, wrappedRequest);
 
             // 执行过滤器链
             // 注：Handler 的 start/end/exception 由 HttpLoggingHandlerInterceptor 记录
-            try {
-                filterChain.doFilter(wrappedRequest, wrappedResponse);
-            } catch (Exception e) {
-                // 如果 Interceptor 没有记录异常（如静态资源），则在这里记录
-                if (logger.getException() == null) {
-                    logger.recordHandlerException(e);
-                }
-                throw e;
+            filterChain.doFilter(wrappedRequest, wrappedResponse);
+
+        } catch (Exception e) {
+            // 记录异常
+            if (logger.getException() == null) {
+                logger.recordHandlerException(e);
             }
-
-            // 记录响应信息
-            recordResponse(logger, wrappedResponse);
-
-            // 结束记录
-            logger.end();
-
-            // 输出日志
-            outputLog(logger);
-
+            throw e;
         } finally {
-            HttpRequestLoggerHolder.clear();
+            try {
+                // 记录响应信息（无论成功还是异常都记录）
+                recordResponse(logger, wrappedResponse);
+
+                // 结束记录
+                logger.end();
+
+                // 输出日志
+                outputLog(logger);
+            } finally {
+                HttpRequestLoggerHolder.clear();
+            }
         }
     }
 

@@ -1,0 +1,10 @@
+# HTTP Log Snap 配置
+mc:
+  http:
+    logging:
+      enabled: true
+
+# 服务器端口
+server:
+  port: 8080
+
