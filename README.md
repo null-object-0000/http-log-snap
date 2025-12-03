@@ -64,11 +64,24 @@ mc:
 ```
 
 ```java
-// Controller 中设置扩展信息（可选）
+// 方式1：实现 HttpLogCustomizer 统一定制（推荐）
+@Component
+public class MyHttpLogCustomizer implements HttpLogCustomizer {
+    @Override
+    public void customize(HttpRequestLogger logger, HttpServletRequest request) {
+        // 添加 traceId
+        logger.putExtra("traceId", request.getHeader("X-Trace-Id"));
+        // 根据路径设置接口名称
+        if (request.getRequestURI().startsWith("/api/users")) {
+            logger.setInterfaceName("用户服务");
+        }
+    }
+}
+
+// 方式2：在 Controller 中按需设置
 HttpRequestLogger logger = HttpRequestLoggerHolder.get();
 if (logger != null) {
-    logger.setInterfaceName("创建订单")
-          .putExtra("orderId", "ORD123");
+    logger.putExtra("orderId", "ORD123");
 }
 ```
 
@@ -154,7 +167,7 @@ Content-Type: application/json
 
 | 配置项 | 默认值 | 说明 |
 |--------|--------|------|
-| 格式化器 | `TextHttpLogFormatter` | 文本格式，类似 OkHttp 风格 |
+| 格式化器 | `TextHttpLogFormatter` | 文本格式，类似 HTTP 原始报文 |
 | 输出目标 | `Slf4jLogOutput` | 输出到 SLF4J（INFO 级别） |
 
 **切换格式化器：**

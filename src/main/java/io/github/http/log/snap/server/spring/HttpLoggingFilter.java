@@ -115,6 +115,13 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
     private Predicate<HttpServletRequest> shouldLog = request -> true;
 
     /**
+     * 日志定制器（可选）
+     */
+    @Getter
+    @Setter
+    private HttpLogCustomizer customizer;
+
+    /**
      * 设置需要脱敏的请求头
      */
     public void setHeadersToRedact(Set<String> headers) {
@@ -166,6 +173,11 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
         // 记录客户端和服务器地址
         logger.setRemoteAddress(request.getRemoteAddr() + ":" + request.getRemotePort());
         logger.setLocalAddress(request.getLocalAddr() + ":" + request.getLocalPort());
+
+        // 调用定制器（如果有）
+        if (customizer != null) {
+            customizer.customize(logger, request);
+        }
 
         try {
             // 开始记录

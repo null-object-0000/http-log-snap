@@ -3,6 +3,7 @@ package io.github.http.log.snap.server.spring;
 import io.github.http.log.snap.formatter.JsonHttpLogFormatter;
 import io.github.http.log.snap.formatter.TextHttpLogFormatter;
 import jakarta.servlet.Filter;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -42,7 +43,8 @@ public class HttpLoggingAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(HttpLoggingFilter.class)
     public FilterRegistrationBean<HttpLoggingFilter> httpLoggingFilterRegistration(
-            HttpLoggingProperties properties) {
+            HttpLoggingProperties properties,
+            ObjectProvider<HttpLogCustomizer> customizerProvider) {
 
         HttpLoggingFilter filter = new HttpLoggingFilter();
 
@@ -51,6 +53,9 @@ public class HttpLoggingAutoConfiguration {
         filter.setIncludeResponseBody(properties.isIncludeResponseBody());
         filter.setIncludeHeaders(properties.isIncludeHeaders());
         filter.setMaxPayloadLength(properties.getMaxPayloadLength());
+
+        // 配置定制器（如果有）
+        customizerProvider.ifAvailable(filter::setCustomizer);
 
         // 配置格式化器（TextHttpLogFormatter 会根据 HttpDirection 自动选择格式）
         if ("json".equalsIgnoreCase(properties.getFormat())) {
