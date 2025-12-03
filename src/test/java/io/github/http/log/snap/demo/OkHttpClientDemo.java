@@ -11,8 +11,8 @@ import okhttp3.Response;
 
 /**
  * OkHttp 客户端接入示例
- * 
- * 演示如何使用 HTTP Log Snap 记录 OkHttp 请求日志
+ * <p>
+ * 直接在 IDE 中运行此类即可查看日志输出效果
  */
 public class OkHttpClientDemo {
 
@@ -44,7 +44,7 @@ public class OkHttpClientDemo {
 
         // 5. 执行请求并记录响应体
         try (Response response = client.newCall(request).execute()) {
-            String responseBody = response.body().string();
+            String responseBody = response.body() != null ? response.body().string() : "";
             logger.end(responseBody);
             System.out.println("Response: " + response.code() + "\n");
         }
