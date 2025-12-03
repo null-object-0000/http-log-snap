@@ -10,27 +10,49 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 /**
  * HTTP 日志异常处理器
  * <p>
- * 捕获 Controller 中抛出的异常并记录到 HttpRequestLogger 中。
- * 使用最高优先级确保在其他 ExceptionHandler 之前执行。
+ * 方式1：自动拦截（可能被业务的 GlobalExceptionHandler 优先处理）
  * <p>
- * 注意：此处理器只记录异常，不处理异常（会重新抛出），
- * 实际的异常响应由应用的其他 ExceptionHandler 处理。
+ * 方式2：在业务的 GlobalExceptionHandler 中手动调用 {@link #record(Throwable)}
+ * <pre>{@code
+ * @RestControllerAdvice
+ * public class GlobalExceptionHandler {
+ *     @ExceptionHandler(Exception.class)
+ *     public BaseResponse<?> errorHandler(Exception e) {
+ *         // 记录异常到 HTTP 日志
+ *         HttpLoggingExceptionHandler.record(e);
+ *         
+ *         // ... 原有逻辑
+ *         return BaseResponse.error();
+ *     }
+ * }
+ * }</pre>
  */
 @Slf4j
 @ControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class HttpLoggingExceptionHandler {
 
-    @ExceptionHandler(Exception.class)
-    public void handleException(Exception ex) throws Exception {
-        // 记录异常到 HttpRequestLogger
+    @ExceptionHandler(Throwable.class)
+    public void handleException(Throwable ex) throws Throwable {
+        record(ex);
+        throw ex;
+    }
+
+    /**
+     * 记录异常到 HTTP 日志
+     * <p>
+     * 在业务的 GlobalExceptionHandler 中调用此方法，确保异常被记录到 HTTP 日志中
+     *
+     * @param ex 异常
+     */
+    public static void record(Throwable ex) {
+        if (ex == null) {
+            return;
+        }
         HttpRequestLogger logger = HttpRequestLoggerHolder.get();
         if (logger != null && logger.getException() == null) {
             logger.recordHandlerException(ex);
         }
-
-        // 重新抛出，让其他 ExceptionHandler 处理
-        throw ex;
     }
 }
 

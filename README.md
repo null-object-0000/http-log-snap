@@ -83,6 +83,17 @@ HttpRequestLogger logger = HttpRequestLoggerHolder.get();
 if (logger != null) {
     logger.putExtra("orderId", "ORD123");
 }
+
+// 方式3：在全局异常处理器中记录异常（如果有 GlobalExceptionHandler）
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+    @ExceptionHandler(Exception.class)
+    public BaseResponse<?> errorHandler(Exception e) {
+        HttpLoggingExceptionHandler.record(e);  // 添加这一行
+        // ... 原有逻辑
+        return BaseResponse.error();
+    }
+}
 ```
 
 **搞定！** 服务端自动记录所有 HTTP 请求/响应。
