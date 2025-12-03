@@ -133,6 +133,19 @@ public class OkHttpLoggingEventListener extends EventListener {
     @Override
     public void connectionAcquired(@NonNull Call call, @NonNull Connection connection) {
         logger.recordRequest(buildRequest(call.request(), connection), HttpEvent.CONNECTION_ACQUIRED);
+
+        // 记录连接的本地和远程地址
+        try {
+            java.net.Socket socket = connection.socket();
+            if (socket.getLocalSocketAddress() instanceof InetSocketAddress local) {
+                logger.setLocalAddress(local.getAddress().getHostAddress() + ":" + local.getPort());
+            }
+            if (socket.getRemoteSocketAddress() instanceof InetSocketAddress remote) {
+                logger.setRemoteAddress(remote.getAddress().getHostAddress() + ":" + remote.getPort());
+            }
+        } catch (Exception ignored) {
+            // 忽略获取地址的异常
+        }
     }
 
     @Override

@@ -95,6 +95,26 @@ public class HttpRequestLogger {
     @Setter
     private Throwable exception;
 
+    // ==================== 网络地址信息 ====================
+
+    /**
+     * 本地地址
+     * - 客户端：发起请求的本机 IP:端口
+     * - 服务端：服务器 IP:端口
+     */
+    @Getter
+    @Setter
+    private String localAddress;
+
+    /**
+     * 远程地址
+     * - 客户端：目标服务器 IP:端口
+     * - 服务端：请求来源客户端 IP:端口
+     */
+    @Getter
+    @Setter
+    private String remoteAddress;
+
     // ==================== 构造方法 ====================
 
     /**
@@ -473,6 +493,8 @@ public class HttpRequestLogger {
                 .timing(httpTiming)
                 .startTimeMs(startTimeMs)
                 .endTimeMs(endTimeMs)
+                .localAddress(localAddress)
+                .remoteAddress(remoteAddress)
                 .handlerClass(handlerClass)
                 .handlerMethod(handlerMethod)
                 .exception(exception)

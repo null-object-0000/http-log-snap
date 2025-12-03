@@ -118,6 +118,11 @@ public class TextHttpLogFormatter implements HttpLogFormatter {
         // 总耗时
         logs.append(" (total: %dms)", data.getTotalTimeMs());
 
+        // 客户端 IP（同一行）
+        if (isNotBlank(data.getRemoteAddress())) {
+            logs.append(" [client: %s]", data.getRemoteAddress());
+        }
+
         return logs;
     }
 
@@ -188,6 +193,15 @@ public class TextHttpLogFormatter implements HttpLogFormatter {
         if (connection >= 0) {
             String time = getEventTime(timing, HttpEvent.CONNECT_END, HttpEvent.CONNECT_FAILED);
             logs.line().append(time).space().append("--> CONNECTING (%dms)", connection);
+
+            // 显示连接地址信息（同一行）
+            if (isNotBlank(data.getLocalAddress()) && isNotBlank(data.getRemoteAddress())) {
+                logs.append(" [%s -> %s]", data.getLocalAddress(), data.getRemoteAddress());
+            } else if (isNotBlank(data.getRemoteAddress())) {
+                logs.append(" [-> %s]", data.getRemoteAddress());
+            } else if (isNotBlank(data.getLocalAddress())) {
+                logs.append(" [%s ->]", data.getLocalAddress());
+            }
         }
 
         return logs;

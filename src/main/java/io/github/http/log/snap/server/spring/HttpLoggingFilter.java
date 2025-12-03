@@ -163,6 +163,10 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
         HttpRequestLogger logger = HttpRequestLogger.forServer();
         HttpRequestLoggerHolder.set(logger);
 
+        // 记录客户端和服务器地址
+        logger.setRemoteAddress(request.getRemoteAddr() + ":" + request.getRemotePort());
+        logger.setLocalAddress(request.getLocalAddr() + ":" + request.getLocalPort());
+
         try {
             // 开始记录
             logger.start();

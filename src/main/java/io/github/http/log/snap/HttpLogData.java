@@ -65,6 +65,24 @@ public class HttpLogData {
      */
     private long endTimeMs;
 
+    // ==================== 网络地址信息 ====================
+
+    /**
+     * 本地地址
+     * - 客户端：发起请求的本机 IP:端口
+     * - 服务端：服务器 IP:端口
+     */
+    @Nullable
+    private String localAddress;
+
+    /**
+     * 远程地址
+     * - 客户端：目标服务器 IP:端口
+     * - 服务端：请求来源客户端 IP:端口
+     */
+    @Nullable
+    private String remoteAddress;
+
     // ==================== 处理器/执行器信息 ====================
 
     /**

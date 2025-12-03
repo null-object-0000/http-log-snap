@@ -56,6 +56,18 @@ public class JsonHttpLogFormatter implements HttpLogFormatter {
             json.put("handler", data.getHandlerName());
         }
 
+        // 网络地址信息
+        if (data.getLocalAddress() != null || data.getRemoteAddress() != null) {
+            JSONObject network = new JSONObject(new LinkedHashMap<>());
+            if (data.getLocalAddress() != null) {
+                network.put("local_address", data.getLocalAddress());
+            }
+            if (data.getRemoteAddress() != null) {
+                network.put("remote_address", data.getRemoteAddress());
+            }
+            json.put("network", network);
+        }
+
         // 请求信息
         json.put("request", buildRequestJson(data.getRequest()));
 
