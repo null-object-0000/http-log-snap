@@ -117,6 +117,39 @@ Content-Type: application/json
 | TTFB（首字节时间）| 响应发送时间 |
 | 内容下载时间 | 框架开销时间 |
 
+## ⚙️ 默认配置
+
+| 配置项 | 默认值 | 说明 |
+|--------|--------|------|
+| 格式化器 | `TextHttpLogFormatter` | 文本格式，类似 OkHttp 风格 |
+| 输出目标 | `Slf4jLogOutput` | 输出到 SLF4J（INFO 级别） |
+
+**切换格式化器：**
+
+```java
+// 使用 JSON 格式
+HttpRequestLogger.setDefaultFormatter(new JsonHttpLogFormatter());
+
+// 使用美化的 JSON 格式
+HttpRequestLogger.setDefaultFormatter(new JsonHttpLogFormatter(true));
+```
+
+**切换输出目标：**
+
+```java
+// 输出到控制台
+HttpRequestLogger.setDefaultOutput(new ConsoleLogOutput());
+
+// 输出到 SLF4J DEBUG 级别
+HttpRequestLogger.setDefaultOutput(new Slf4jLogOutput(Slf4jLogOutput.LogLevel.DEBUG));
+
+// 同时输出到多个目标
+HttpRequestLogger.setDefaultOutput(CompositeLogOutput.of(
+    new Slf4jLogOutput(),
+    new ConsoleLogOutput()
+));
+```
+
 ## 📚 文档
 
 - [📖 使用指南](docs/guide.md) - 完整的使用教程
