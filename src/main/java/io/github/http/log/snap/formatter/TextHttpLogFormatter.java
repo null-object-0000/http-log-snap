@@ -1,5 +1,6 @@
 package io.github.http.log.snap.formatter;
 
+import com.alibaba.fastjson2.JSON;
 import io.github.http.log.snap.*;
 import lombok.NonNull;
 
@@ -102,6 +103,9 @@ public class TextHttpLogFormatter implements HttpLogFormatter {
         HttpTiming timing = data.getTiming();
         HttpLogContext context = data.getContext();
 
+        // 扩展信息（最前面）
+        appendContextExtras(logs, timing, context);
+
         // 开始标题
         logs.line().append(getEventTime(timing, HttpEvent.START)).space().append("--- START [SERVER]");
 
@@ -133,6 +137,9 @@ public class TextHttpLogFormatter implements HttpLogFormatter {
         HttpTiming timing = data.getTiming();
         HttpLogData.Request request = data.getRequest();
         HttpLogContext context = data.getContext();
+
+        // 扩展信息（最前面）
+        appendContextExtras(logs, timing, context);
 
         // 开始标题
         logs.line().append(getEventTime(timing, HttpEvent.START)).space().append("--- START");
@@ -170,6 +177,18 @@ public class TextHttpLogFormatter implements HttpLogFormatter {
         }
     }
 
+    /**
+     * 输出上下文扩展信息（独立一行，位于最前面，JSON 格式）
+     */
+    private void appendContextExtras(LogStringBuilder logs, HttpTiming timing, HttpLogContext context) {
+        if (context == null || context.getExtras() == null || context.getExtras().isEmpty()) {
+            return;
+        }
+        String time = getEventTime(timing, HttpEvent.START);
+        String json = JSON.toJSONString(context.getExtras());
+        logs.line().append(time).space().appendLine("--- LOG EXTRAS -------------------------------------------------------").append(json);
+    }
+
     // ==================== 日志构建 - 连接阶段 ====================
 
     private LogStringBuilder buildConnectLogs(HttpLogData data) {
@@ -182,7 +201,7 @@ public class TextHttpLogFormatter implements HttpLogFormatter {
 
         if (dnsLookup >= 0 || connection >= 0) {
             logs.line().append(getEventTime(timing, HttpEvent.CALL_START)).space()
-                    .append("--> CALL START ------------------------------------------------->");
+                    .append("--> CALL START ------------------------------------------------------>");
         }
 
         if (dnsLookup >= 0) {
@@ -223,7 +242,7 @@ public class TextHttpLogFormatter implements HttpLogFormatter {
         String displayUrl = redactUrl(request.getUrl());
 
         logs.line().append(startTime).space()
-                .appendLine("--> REQUEST START ---------------------------------------------->")
+                .appendLine("--> REQUEST START --------------------------------------------------->")
                 .append("%s %s", request.getMethod(), displayUrl);
 
         if (isNotBlank(request.getProtocol())) {
@@ -317,7 +336,7 @@ public class TextHttpLogFormatter implements HttpLogFormatter {
                 : getEventTime(timing, HttpEvent.RESPONSE_HEADERS_START);
 
         logs.append(startTime).space()
-                .appendLine("<-- RESPONSE START <---------------------------------------------");
+                .appendLine("<-- RESPONSE START <--------------------------------------------------");
 
         // 状态行
         if (resp.getProtocol() != null) {
@@ -344,8 +363,6 @@ public class TextHttpLogFormatter implements HttpLogFormatter {
 
         // 响应头
         appendResponseHeaders(logs, resp);
-        logs.line();
-
         // 响应体
         appendResponseBody(logs, data, resp);
 

@@ -253,16 +253,16 @@ public class UserController {
 15:42:31.123 --- START [NONE] 获取用户信息 (total: 245ms)
 15:42:31.125 --- BUILD CLIENT (2ms)
 15:42:31.128 --- BUILD REQUEST (3ms)
-15:42:31.130 --> CALL START ------------------------------------------------->
+15:42:31.130 --> CALL START ------------------------------------------------------>
 15:42:31.180 --> DNS LOOKUP (50ms)
 15:42:31.210 --> CONNECTING (30ms)
-15:42:31.215 --> REQUEST START ---------------------------------------------->
+15:42:31.215 --> REQUEST START --------------------------------------------------->
 GET https://api.example.com/users/123 HTTP/2
 Content-Type: application/json
 Authorization: ██
 
 15:42:31.220 --> END REQUEST (5ms)
-15:42:31.350 <-- RESPONSE START <---------------------------------------------
+15:42:31.350 <-- RESPONSE START <--------------------------------------------------
 HTTP/2 200 OK (130ms)
 Content-Type: application/json; charset=utf-8
 Content-Length: 256
@@ -275,14 +275,14 @@ Content-Length: 256
 
 ```
 15:42:31.100 --- START [SERVER] 用户登录接口 -> UserController.login (total: 156ms)
-15:42:31.102 --> REQUEST START ---------------------------------------------->
+15:42:31.102 --> REQUEST START --------------------------------------------------->
 POST http://localhost:8080/api/login HTTP/1.1
 Content-Type: application/json
 Content-Length: 45
 
 {"username":"zhangsan","password":"****"}
 15:42:31.110 --> END REQUEST (8ms)
-15:42:31.245 <-- RESPONSE START <---------------------------------------------
+15:42:31.245 <-- RESPONSE START <--------------------------------------------------
 200 OK (handler: 135ms)
 Content-Type: application/json
 

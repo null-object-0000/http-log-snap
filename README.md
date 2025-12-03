@@ -28,13 +28,29 @@
 ### 客户端（OkHttp）
 
 ```java
-// 1. 添加 EventListener
+// 1. 创建 OkHttpClient
 OkHttpClient client = new OkHttpClient.Builder()
     .eventListenerFactory(OkHttpLoggingEventListener.FACTORY)
     .build();
 
-// 2. 发起请求，自动记录日志
-Response response = client.newCall(request).execute();
+// 2. 创建 Logger
+HttpRequestLogger logger = HttpRequestLogger.forClient(HttpLogContext.of("创建订单"));
+logger.putExtra("orderId", "ORD123");
+
+// 3. 发起请求
+String body = "{\"name\":\"test\"}";
+logger.start(body);
+Request request = new Request.Builder()
+    .url("https://api.example.com/orders")
+    .tag(HttpRequestLogger.class, logger)
+    .post(RequestBody.create(body, MediaType.parse("application/json")))
+    .build();
+try (Response response = client.newCall(request).execute()) {
+    logger.end(response.body().string());
+}
+
+// 4. 输出日志
+logger.log();
 ```
 
 ### 服务端（Spring Boot）
@@ -47,21 +63,32 @@ mc:
       enabled: true
 ```
 
-**搞定！** 自动记录所有 HTTP 请求/响应。
+```java
+// Controller 中设置扩展信息（可选）
+HttpRequestLogger logger = HttpRequestLoggerHolder.get();
+if (logger != null) {
+    logger.setInterfaceName("创建订单")
+          .putExtra("orderId", "ORD123");
+}
+```
+
+**搞定！** 服务端自动记录所有 HTTP 请求/响应。
 
 ## 📝 日志输出效果
 
 ### 客户端日志
 
 ```
-15:42:31.123 --- START [CLIENT] 获取用户信息 (total: 245ms)
+15:42:31.123 --- LOG EXTRAS -------------------------------------------------------
+{"userId":10086,"source":"app"}
+15:42:31.123 --- START [NONE] 获取用户信息 (total: 245ms)
 15:42:31.180 --> DNS LOOKUP (50ms)
-15:42:31.210 --> CONNECTING (30ms)
-15:42:31.215 --> REQUEST START ------------------------------------------------>
+15:42:31.210 --> CONNECTING (30ms) [192.168.1.100:54321 -> 203.0.113.50:443]
+15:42:31.215 --> REQUEST START --------------------------------------------------->
 GET https://api.example.com/users/123 HTTP/2
 Authorization: ██
 
-15:42:31.350 <-- RESPONSE START <-----------------------------------------------
+15:42:31.350 <-- RESPONSE START <--------------------------------------------------
 HTTP/2 200 OK (130ms)
 Content-Type: application/json
 
@@ -72,13 +99,15 @@ Content-Type: application/json
 ### 服务端日志
 
 ```
-15:42:31.100 --- START [SERVER] -> UserController.login (total: 156ms)
-15:42:31.102 --> REQUEST START ------------------------------------------------>
+15:42:31.100 --- LOG EXTRAS -------------------------------------------------------
+{"orderId":"ORD123","channel":"web"}
+15:42:31.100 --- START [SERVER] 用户登录 -> UserController.login (total: 156ms) [client: 192.168.1.50:52341]
+15:42:31.102 --> REQUEST START --------------------------------------------------->
 POST http://localhost:8080/api/login HTTP/1.1
 Content-Type: application/json
 
 {"username":"zhangsan","password":"****"}
-15:42:31.245 <-- RESPONSE START <-----------------------------------------------
+15:42:31.245 <-- RESPONSE START <--------------------------------------------------
 200 OK (handler: 135ms)
 
 {"code":0,"message":"success","data":{"token":"eyJ..."}}
@@ -91,6 +120,10 @@ Content-Type: application/json
 {
   "type": "HTTP_CLIENT",
   "duration_ms": 245,
+  "network": {
+    "local_address": "192.168.1.100:54321",
+    "remote_address": "203.0.113.50:443"
+  },
   "request": {
     "method": "GET",
     "url": "https://api.example.com/users/123"
@@ -154,6 +187,9 @@ HttpRequestLogger.setDefaultOutput(CompositeLogOutput.of(
 
 - [📖 使用指南](docs/guide.md) - 完整的使用教程
 - [🔧 高级用法](docs/advanced.md) - 自定义格式化器、输出目标、适配器
+- [💡 接入示例](demo/) - 完整的接入示例代码
+  - [OkHttp 客户端](demo/client-okhttp/)
+  - [Spring Boot 服务端](demo/server-spring-boot/)
 
 ## 🤝 贡献
 

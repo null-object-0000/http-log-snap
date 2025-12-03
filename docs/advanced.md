@@ -33,11 +33,11 @@ HttpRequestLogger.setDefaultFormatter(formatter);
 15:42:31.123 --- START [NONE] 获取用户信息 (total: 245ms)
 15:42:31.180 --> DNS LOOKUP (50ms)
 15:42:31.210 --> CONNECTING (30ms)
-15:42:31.215 --> REQUEST START ---------------------------------------------->
+15:42:31.215 --> REQUEST START --------------------------------------------------->
 GET https://api.example.com/users/123?token=*** HTTP/2
 Authorization: ***
 
-15:42:31.350 <-- RESPONSE START <---------------------------------------------
+15:42:31.350 <-- RESPONSE START <--------------------------------------------------
 HTTP/2 200 OK (130ms)
 Content-Type: application/json
 

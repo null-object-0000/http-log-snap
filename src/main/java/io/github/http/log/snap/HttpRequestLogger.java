@@ -532,6 +532,30 @@ public class HttpRequestLogger {
     }
 
     /**
+     * 添加扩展信息（会输出到日志）
+     */
+    public HttpRequestLogger putExtra(String key, Object value) {
+        this.context.putExtra(key, value);
+        return this;
+    }
+
+    /**
+     * 获取扩展信息
+     */
+    @Nullable
+    public Object getExtra(String key) {
+        return (context == null) ? null : context.getExtra(key);
+    }
+
+    /**
+     * 设置接口名称
+     */
+    public HttpRequestLogger setInterfaceName(String interfaceName) {
+        this.context.setInterfaceName(interfaceName);
+        return this;
+    }
+
+    /**
      * 是否为服务端
      */
     public boolean isServer() {
