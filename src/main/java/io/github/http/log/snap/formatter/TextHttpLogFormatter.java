@@ -276,12 +276,12 @@ public class TextHttpLogFormatter implements HttpLogFormatter {
             logs.appendLine(request.getBody());
             logs.append(endTime).space();
 
+            int bodySize = request.getBody().getBytes(StandardCharsets.UTF_8).length;
             if ("gzip".equalsIgnoreCase(request.getHeaders().get("Content-Encoding"))) {
-                int rawSize = request.getBody().getBytes(StandardCharsets.UTF_8).length;
                 logs.appendLine("--> END REQUEST (%s, %d-byte, %d-gzipped-byte body)",
-                        requestTime, rawSize, request.getByteCount());
+                        requestTime, bodySize, request.getByteCount());
             } else {
-                logs.appendLine("--> END REQUEST (%s, %d-byte body)", requestTime, request.getContentLength());
+                logs.appendLine("--> END REQUEST (%s, %d-byte body)", requestTime, bodySize);
             }
         }
     }

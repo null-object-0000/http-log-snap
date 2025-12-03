@@ -227,6 +227,7 @@ public class HttpLogData {
             if (other.getContentType() != null) this.contentType = other.getContentType();
             if (other.getContentLength() != null) this.contentLength = other.getContentLength();
             if (other.getHeaders() != null) this.headers = other.getHeaders();
+            if (other.getIoe() != null) this.ioe = other.getIoe();
 
             return this;
         }
@@ -302,4 +303,3 @@ public class HttpLogData {
         return str != null && !str.isBlank();
     }
 }
-
