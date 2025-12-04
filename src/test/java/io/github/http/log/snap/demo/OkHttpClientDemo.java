@@ -3,6 +3,7 @@ package io.github.http.log.snap.demo;
 import io.github.http.log.snap.HttpLogContext;
 import io.github.http.log.snap.HttpRequestLogger;
 import io.github.http.log.snap.client.okhttp.OkHttpLoggingEventListener;
+import io.github.http.log.snap.formatter.JsonHttpLogFormatter;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -18,6 +19,8 @@ public class OkHttpClientDemo {
 
     public static void main(String[] args) throws Exception {
         System.out.println("=== HTTP Log Snap - OkHttp Client Demo ===\n");
+
+        HttpRequestLogger.setDefaultFormatter(new JsonHttpLogFormatter().setIncludeEvents(true));
 
         // 1. 创建带有 EventListener 的 OkHttpClient
         OkHttpClient client = new OkHttpClient.Builder()

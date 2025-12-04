@@ -2,7 +2,6 @@ package io.github.http.log.snap;
 
 import io.github.http.log.snap.formatter.HttpLogFormatter;
 import io.github.http.log.snap.formatter.JsonHttpLogFormatter;
-import io.github.http.log.snap.formatter.TextHttpLogFormatter;
 import io.github.http.log.snap.output.HttpLogOutput;
 import io.github.http.log.snap.output.Slf4jLogOutput;
 import lombok.Getter;
@@ -30,7 +29,7 @@ public class HttpRequestLogger {
     /**
      * 默认的日志格式化器（文本格式）
      */
-    private static HttpLogFormatter defaultFormatter = new TextHttpLogFormatter();
+    private static HttpLogFormatter defaultFormatter = new JsonHttpLogFormatter();
 
     /**
      * 默认的日志输出（SLF4J）

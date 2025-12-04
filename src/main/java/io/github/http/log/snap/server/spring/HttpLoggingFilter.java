@@ -179,9 +179,9 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
             customizer.customize(logger, request);
         }
 
-        // 包装请求和响应以支持多次读取
-        CachedBodyHttpServletRequest wrappedRequest = new CachedBodyHttpServletRequest(request);
-        CachedBodyHttpServletResponse wrappedResponse = new CachedBodyHttpServletResponse(response);
+            // 包装请求和响应以支持多次读取
+            CachedBodyHttpServletRequest wrappedRequest = new CachedBodyHttpServletRequest(request);
+            CachedBodyHttpServletResponse wrappedResponse = new CachedBodyHttpServletResponse(response);
 
         try {
             // 开始记录
@@ -192,26 +192,26 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
 
             // 执行过滤器链
             // 注：Handler 的 start/end/exception 由 HttpLoggingHandlerInterceptor 记录
-            filterChain.doFilter(wrappedRequest, wrappedResponse);
+                filterChain.doFilter(wrappedRequest, wrappedResponse);
 
-        } catch (Exception e) {
+            } catch (Exception e) {
             // 记录异常
-            if (logger.getException() == null) {
-                logger.recordHandlerException(e);
-            }
-            throw e;
+                if (logger.getException() == null) {
+                    logger.recordHandlerException(e);
+                }
+                throw e;
         } finally {
             try {
                 // 记录响应信息（无论成功还是异常都记录）
-                recordResponse(logger, wrappedResponse);
+            recordResponse(logger, wrappedResponse);
 
-                // 结束记录
-                logger.end();
+            // 结束记录
+            logger.end();
 
-                // 输出日志
-                outputLog(logger);
-            } finally {
-                HttpRequestLoggerHolder.clear();
+            // 输出日志
+            outputLog(logger);
+        } finally {
+            HttpRequestLoggerHolder.clear();
             }
         }
     }

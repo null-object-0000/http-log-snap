@@ -28,11 +28,22 @@ public class JsonHttpLogFormatter implements HttpLogFormatter {
      */
     private boolean prettyPrint = false;
 
+    /**
+     * 是否包含完整的事件序列（默认只记录计算后的指标）
+     * 开启后会在 timing.events 中记录所有事件的详细信息
+     */
+    private boolean includeEvents = false;
+
     public JsonHttpLogFormatter() {
     }
 
     public JsonHttpLogFormatter(boolean prettyPrint) {
         this.prettyPrint = prettyPrint;
+    }
+
+    public JsonHttpLogFormatter(boolean prettyPrint, boolean includeEvents) {
+        this.prettyPrint = prettyPrint;
+        this.includeEvents = includeEvents;
     }
 
     @Override
@@ -133,6 +144,18 @@ public class JsonHttpLogFormatter implements HttpLogFormatter {
      */
     public JsonHttpLogFormatter setPrettyPrint(boolean prettyPrint) {
         this.prettyPrint = prettyPrint;
+        return this;
+    }
+
+    /**
+     * 设置是否包含完整的事件序列
+     * 开启后会在 timing.events 中记录所有事件的详细信息，便于分析调用链路
+     *
+     * @param includeEvents 是否包含事件序列
+     * @return 当前格式化器实例（支持链式调用）
+     */
+    public JsonHttpLogFormatter setIncludeEvents(boolean includeEvents) {
+        this.includeEvents = includeEvents;
         return this;
     }
 
@@ -266,7 +289,50 @@ public class JsonHttpLogFormatter implements HttpLogFormatter {
         putIfPositive(metricsJson, "finalization_ms", metrics.executionFinalization());
         json.put("metrics", metricsJson);
 
+        // 如果开启了事件序列记录，输出完整的事件列表
+        if (includeEvents) {
+            json.put("events", buildEventsJson(timing));
+        }
+
         return json;
+    }
+
+    /**
+     * 构建事件序列 JSON 数组
+     * 按执行顺序输出所有事件的详细信息
+     */
+    private com.alibaba.fastjson2.JSONArray buildEventsJson(HttpTiming timing) {
+        com.alibaba.fastjson2.JSONArray eventsArray = new com.alibaba.fastjson2.JSONArray();
+
+        // 获取第一个事件的时间作为基准
+        long baseTime = timing.getFirstEventRecord()
+                .map(HttpTiming.EventRecord::getTime)
+                .orElse(0L);
+
+        long previousTime = baseTime;
+
+        // 按步骤顺序遍历所有事件
+        for (int step = 1; ; step++) {
+            var recordOpt = timing.getEventRecordByStep(step);
+            if (recordOpt.isEmpty()) {
+                break;
+            }
+
+            HttpTiming.EventRecord record = recordOpt.get();
+            long currentTime = record.getTime();
+
+            JSONObject eventJson = new JSONObject(new LinkedHashMap<>());
+            eventJson.put("step", record.getStep());
+            eventJson.put("event", record.getClazz().getSimpleName() + "." + record.getEvent());
+            eventJson.put("timestamp", currentTime);
+            eventJson.put("interval_ms", currentTime - previousTime);
+            eventJson.put("elapsed_ms", currentTime - baseTime);
+
+            eventsArray.add(eventJson);
+            previousTime = currentTime;
+        }
+
+        return eventsArray;
     }
 
     private JSONObject buildErrorJson(Throwable exception) {

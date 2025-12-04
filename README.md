@@ -189,6 +189,11 @@ HttpRequestLogger.setDefaultFormatter(new JsonHttpLogFormatter());
 
 // 使用美化的 JSON 格式
 HttpRequestLogger.setDefaultFormatter(new JsonHttpLogFormatter(true));
+
+// 使用 JSON 格式 + 记录完整事件序列（用于分析调用链路）
+HttpRequestLogger.setDefaultFormatter(new JsonHttpLogFormatter()
+    .setPrettyPrint(true)
+    .setIncludeEvents(true));
 ```
 
 **切换输出目标：**
