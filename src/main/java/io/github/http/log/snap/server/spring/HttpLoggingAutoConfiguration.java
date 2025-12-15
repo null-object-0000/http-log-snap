@@ -149,7 +149,7 @@ public class HttpLoggingAutoConfiguration {
         /**
          * 日志格式：json 或 text
          */
-        private String format = "text";
+        private String format = "json";
 
         /**
          * 需要脱敏的请求头名称

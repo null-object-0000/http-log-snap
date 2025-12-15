@@ -176,10 +176,10 @@ Content-Type: application/json
 
 ## ⚙️ 默认配置
 
-| 配置项 | 默认值 | 说明 |
-|--------|--------|------|
-| 格式化器 | `TextHttpLogFormatter` | 文本格式，类似 HTTP 原始报文 |
-| 输出目标 | `Slf4jLogOutput` | 输出到 SLF4J（INFO 级别） |
+| 配置项 | 默认值                    | 说明                 |
+|--------|------------------------|--------------------|
+| 格式化器 | `JsonHttpLogFormatter` | JSON 格式            |
+| 输出目标 | `Slf4jLogOutput`       | 输出到 SLF4J（INFO 级别） |
 
 **切换格式化器：**
 

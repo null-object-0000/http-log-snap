@@ -6,7 +6,7 @@
 
     <groupId>io.github.null-object-0000</groupId>
     <artifactId>http-log-snap</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
     <packaging>jar</packaging>
 
     <name>HTTP Log Snap</name>
@@ -243,6 +243,7 @@
             </plugin>
         </plugins>
     </build>
+
 </project>
 
 
