@@ -145,9 +145,9 @@ public class HttpLoggingAutoConfiguration {
         private boolean includeHeaders = true;
 
         /**
-         * 请求体/响应体最大记录长度（字节）
+         * 请求体/响应体最大记录长度（字节，-1 表示无限制）
          */
-        private int maxPayloadLength = 384 * 1024;
+        private int maxPayloadLength = -1;
 
         /**
          * 日志格式：json 或 text

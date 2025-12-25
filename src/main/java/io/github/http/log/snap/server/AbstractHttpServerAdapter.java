@@ -292,7 +292,11 @@ public abstract class AbstractHttpServerAdapter implements HttpServerAdapter {
      * @return 截断后的内容
      */
     protected String truncateBody(String body, int maxLength) {
-        if (body == null || body.length() <= maxLength) {
+        if (body == null || body.length() == 0) {
+            return body;
+        }
+        // maxLength <= 0 表示无限制
+        if (maxLength <= 0 || body.length() <= maxLength) {
             return body;
         }
         return body.substring(0, maxLength) + "... [truncated " + (body.length() - maxLength) + " chars]";
@@ -313,7 +317,8 @@ public abstract class AbstractHttpServerAdapter implements HttpServerAdapter {
         
         Charset cs = charset != null ? charset : StandardCharsets.UTF_8;
         
-        if (body.length <= maxLength) {
+        // maxLength <= 0 表示无限制
+        if (maxLength <= 0 || body.length <= maxLength) {
             return new String(body, cs);
         }
         

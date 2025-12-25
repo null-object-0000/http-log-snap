@@ -44,9 +44,9 @@ import java.util.function.Predicate;
 public class HttpLoggingFilter extends OncePerRequestFilter {
 
     /**
-     * 默认不记录请求体的最大长度（384KB）
+     * 默认不记录请求体的最大长度（-1 表示无限制）
      */
-    private static final int DEFAULT_MAX_PAYLOAD_LENGTH = 384 * 1024;
+    private static final int DEFAULT_MAX_PAYLOAD_LENGTH = -1;
 
     /**
      * 默认需要脱敏的请求头
@@ -419,7 +419,8 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
             return "";
         }
 
-        if (body.length <= maxPayloadLength) {
+        // maxPayloadLength <= 0 表示无限制
+        if (maxPayloadLength <= 0 || body.length <= maxPayloadLength) {
             return new String(body, charset);
         }
 

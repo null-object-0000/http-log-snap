@@ -180,9 +180,9 @@ Content-Type: application/json
 |--------|------------------------|--------------------|
 | 格式化器 | `JsonHttpLogFormatter` | JSON 格式            |
 | 输出目标 | `Slf4jLogOutput`       | 输出到 SLF4J（INFO 级别） |
-| 请求体/响应体最大长度 | `384 KB` | 超过此长度会被截断，并添加截断提示 |
+| 请求体/响应体最大长度 | `无限制` | 默认不限制，可通过配置设置限制（超过限制会被截断） |
 
-**⚠️ 重要提示：** 请求体和响应体的最大记录长度默认为 **384 KB**。超过此长度的内容会被截断，并在日志中显示 `... [truncated N bytes]` 提示。此限制是为了避免单条日志过大，确保与日志系统的兼容性（如单条日志限制为 512KB 的系统）。如需调整，可以通过配置修改 `maxPayloadLength`、`maxRequestBodyLength` 或 `maxResponseBodyLength`。
+**⚠️ 重要提示：** 请求体和响应体的最大记录长度默认**无限制**（`-1`）。如果设置了限制值，超过此长度的内容会被截断，并在日志中显示 `... [truncated N bytes]` 提示。建议根据实际日志系统的限制（如单条日志限制为 512KB 的系统）来设置合适的限制值。可通过配置修改 `maxPayloadLength`、`maxRequestBodyLength` 或 `maxResponseBodyLength`。
 
 **切换格式化器：**
 
@@ -231,7 +231,7 @@ formatter.setMaxResponseBodyLength(512 * 1024); // 响应体最大长度
 mc:
   http:
     logging:
-      max-payload-length: 512000  # 512KB（单位：字节）
+      max-payload-length: 512000  # 512KB（单位：字节，-1 表示无限制）
 ```
 
 ## 📚 文档

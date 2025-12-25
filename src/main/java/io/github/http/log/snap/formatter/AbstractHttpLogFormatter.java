@@ -80,16 +80,16 @@ public abstract class AbstractHttpLogFormatter implements HttpLogFormatter {
     protected boolean includeTimingMetrics = true;
 
     /**
-     * 最大请求体长度（超过则截断）
+     * 最大请求体长度（超过则截断，-1 表示无限制）
      */
     @Getter
-    protected int maxRequestBodyLength = 384 * 1024;
+    protected int maxRequestBodyLength = -1;
 
     /**
-     * 最大响应体长度（超过则截断）
+     * 最大响应体长度（超过则截断，-1 表示无限制）
      */
     @Getter
-    protected int maxResponseBodyLength = 384 * 1024;
+    protected int maxResponseBodyLength = -1;
 
     @Override
     public final String format(@NonNull HttpLogData data) {
@@ -267,7 +267,11 @@ public abstract class AbstractHttpLogFormatter implements HttpLogFormatter {
      * 截断字符串
      */
     protected String truncate(String str, int maxLength) {
-        if (str == null || str.length() <= maxLength) {
+        if (str == null || str.length() == 0) {
+            return str;
+        }
+        // maxLength <= 0 表示无限制
+        if (maxLength <= 0 || str.length() <= maxLength) {
             return str;
         }
         return str.substring(0, maxLength) + "... [truncated " + (str.length() - maxLength) + " chars]";

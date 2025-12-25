@@ -142,9 +142,9 @@ public interface HttpServerAdapter {
         private boolean includeHeaders = true;
 
         /**
-         * 请求体最大记录长度
+         * 请求体最大记录长度（-1 表示无限制）
          */
-        private int maxPayloadLength = 384 * 1024;
+        private int maxPayloadLength = -1;
 
         /**
          * 需要脱敏的请求头
