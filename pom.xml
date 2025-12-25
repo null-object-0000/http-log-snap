@@ -6,7 +6,7 @@
 
     <groupId>io.github.null-object-0000</groupId>
     <artifactId>http-log-snap</artifactId>
-    <version>0.0.2</version>
+    <version>0.0.3</version>
     <packaging>jar</packaging>
 
     <name>HTTP Log Snap</name>
@@ -243,6 +243,33 @@
             </plugin>
         </plugins>
     </build>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>maven-market-snapshots</id>
+            <url>https://nexus.17usoft.com/repository/maven-market-platform-snapshot/</url>
+        </snapshotRepository>
+        <repository>
+            <id>maven-market-releases</id>
+            <url>https://nexus.17usoft.com/repository/maven-market-platform-release/</url>
+        </repository>
+    </distributionManagement>
+
+    <repositories>
+        <repository>
+            <id>tc-maven</id>
+            <name>tc maven</name>
+            <url>https://nexus.17usoft.com/repository/mvn-all/</url>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>tc-maven</id>
+            <name>tc maven</name>
+            <url>https://nexus.17usoft.com/repository/mvn-all/</url>
+        </pluginRepository>
+    </pluginRepositories>
 
 </project>
 

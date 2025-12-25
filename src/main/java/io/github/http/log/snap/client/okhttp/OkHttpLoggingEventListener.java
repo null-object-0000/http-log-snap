@@ -294,7 +294,9 @@ public class OkHttpLoggingEventListener extends EventListener {
     private HttpLogData.Request buildRequest(@NonNull Request request, @Nullable Proxy proxy,
                                              @Nullable Protocol protocol, @Nullable IOException ioe) {
         HttpLogData.Request logRequest = new HttpLogData.Request();
-        logRequest.setUrl(redactUrl(request.url()));
+        String url = redactUrl(request.url());
+        logRequest.setUrl(url);
+        logRequest.setUrlWithoutQuery(HttpLogData.Request.extractUrlWithoutQuery(url));
         logRequest.setMethod(request.method());
         logRequest.setProtocol(protocol == null ? null : protocol.toString().toUpperCase());
         logRequest.setProxy(proxy);

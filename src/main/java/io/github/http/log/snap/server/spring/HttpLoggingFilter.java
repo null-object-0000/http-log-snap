@@ -240,7 +240,9 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
 
         // 基本信息
         requestData.setMethod(request.getMethod());
-        requestData.setUrl(buildRequestUrl(request));
+        String url = buildRequestUrl(request);
+        requestData.setUrl(url);
+        requestData.setUrlWithoutQuery(HttpLogData.Request.extractUrlWithoutQuery(url));
         requestData.setProtocol(request.getProtocol());
 
         // 请求头

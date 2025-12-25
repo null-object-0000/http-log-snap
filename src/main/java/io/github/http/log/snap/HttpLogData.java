@@ -183,6 +183,10 @@ public class HttpLogData {
     public static class Request {
         private String method;
         private String url;
+        /**
+         * 无 query 参数的 URL
+         */
+        private String urlWithoutQuery;
         private String protocol;
         private Proxy proxy;
 
@@ -205,6 +209,7 @@ public class HttpLogData {
 
             if (isNotBlank(other.getMethod())) this.method = other.getMethod();
             if (isNotBlank(other.getUrl())) this.url = other.getUrl();
+            if (isNotBlank(other.getUrlWithoutQuery())) this.urlWithoutQuery = other.getUrlWithoutQuery();
             if (isNotBlank(other.getProtocol())) this.protocol = other.getProtocol();
             if (other.getProxy() != null) this.proxy = other.getProxy();
             if (other.getContentType() != null) this.contentType = other.getContentType();
@@ -213,6 +218,22 @@ public class HttpLogData {
             if (other.getIoe() != null) this.ioe = other.getIoe();
 
             return this;
+        }
+
+        /**
+         * 从完整 URL 中提取没有 query 参数的部分
+         * 如果 URL 为 null 或没有 query 参数，则返回原 URL
+         */
+        @Nullable
+        public static String extractUrlWithoutQuery(@Nullable String url) {
+            if (url == null || url.isEmpty()) {
+                return url;
+            }
+            int queryIndex = url.indexOf('?');
+            if (queryIndex < 0) {
+                return url;
+            }
+            return url.substring(0, queryIndex);
         }
     }
 
