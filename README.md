@@ -180,6 +180,9 @@ Content-Type: application/json
 |--------|------------------------|--------------------|
 | 格式化器 | `JsonHttpLogFormatter` | JSON 格式            |
 | 输出目标 | `Slf4jLogOutput`       | 输出到 SLF4J（INFO 级别） |
+| 请求体/响应体最大长度 | `384 KB` | 超过此长度会被截断，并添加截断提示 |
+
+**⚠️ 重要提示：** 请求体和响应体的最大记录长度默认为 **384 KB**。超过此长度的内容会被截断，并在日志中显示 `... [truncated N bytes]` 提示。此限制是为了避免单条日志过大，确保与日志系统的兼容性（如单条日志限制为 512KB 的系统）。如需调整，可以通过配置修改 `maxPayloadLength`、`maxRequestBodyLength` 或 `maxResponseBodyLength`。
 
 **切换格式化器：**
 
@@ -210,6 +213,25 @@ HttpRequestLogger.setDefaultOutput(CompositeLogOutput.of(
     new Slf4jLogOutput(),
     new ConsoleLogOutput()
 ));
+```
+
+**配置请求体/响应体最大长度：**
+
+```java
+// 服务端：通过 HttpLoggingFilter 配置
+HttpLoggingFilter filter = new HttpLoggingFilter();
+filter.setMaxPayloadLength(512 * 1024); // 设置为 512KB
+
+// 格式化器：通过 AbstractHttpLogFormatter 配置
+JsonHttpLogFormatter formatter = new JsonHttpLogFormatter();
+formatter.setMaxRequestBodyLength(512 * 1024);  // 请求体最大长度
+formatter.setMaxResponseBodyLength(512 * 1024); // 响应体最大长度
+
+// Spring Boot 自动配置（application.yml）
+mc:
+  http:
+    logging:
+      max-payload-length: 512000  # 512KB（单位：字节）
 ```
 
 ## 📚 文档

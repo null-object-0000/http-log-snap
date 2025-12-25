@@ -147,7 +147,7 @@ public class HttpLoggingAutoConfiguration {
         /**
          * 请求体/响应体最大记录长度（字节）
          */
-        private int maxPayloadLength = 256 * 1024;
+        private int maxPayloadLength = 384 * 1024;
 
         /**
          * 日志格式：json 或 text

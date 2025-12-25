@@ -144,7 +144,7 @@ public interface HttpServerAdapter {
         /**
          * 请求体最大记录长度
          */
-        private int maxPayloadLength = 256 * 1024;
+        private int maxPayloadLength = 384 * 1024;
 
         /**
          * 需要脱敏的请求头
