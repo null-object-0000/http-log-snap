@@ -10,6 +10,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -43,9 +44,9 @@ import java.util.function.Predicate;
 public class HttpLoggingFilter extends OncePerRequestFilter {
 
     /**
-     * 默认不记录请求体的最大长度（512KB）
+     * 默认不记录请求体的最大长度（256KB）
      */
-    private static final int DEFAULT_MAX_PAYLOAD_LENGTH = 512 * 1024;
+    private static final int DEFAULT_MAX_PAYLOAD_LENGTH = 256 * 1024;
 
     /**
      * 默认需要脱敏的请求头
@@ -157,7 +158,7 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain)
             throws ServletException, IOException {
 
         // 检查是否需要记录日志
@@ -235,7 +236,7 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
     /**
      * 记录请求信息
      */
-    protected void recordRequest(HttpRequestLogger logger, CachedBodyHttpServletRequest request) throws IOException {
+    protected void recordRequest(HttpRequestLogger logger, CachedBodyHttpServletRequest request) {
         HttpLogData.Request requestData = new HttpLogData.Request();
 
         // 基本信息

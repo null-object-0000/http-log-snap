@@ -3,6 +3,8 @@ package io.github.http.log.snap.server.spring;
 import io.github.http.log.snap.formatter.JsonHttpLogFormatter;
 import io.github.http.log.snap.formatter.TextHttpLogFormatter;
 import jakarta.servlet.Filter;
+import lombok.Data;
+import lombok.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -109,7 +111,7 @@ public class HttpLoggingAutoConfiguration {
     public WebMvcConfigurer httpLoggingWebMvcConfigurer(HttpLoggingHandlerInterceptor interceptor) {
         return new WebMvcConfigurer() {
             @Override
-            public void addInterceptors(InterceptorRegistry registry) {
+            public void addInterceptors(@NonNull InterceptorRegistry registry) {
                 registry.addInterceptor(interceptor).addPathPatterns("/**");
             }
         };
@@ -118,6 +120,7 @@ public class HttpLoggingAutoConfiguration {
     /**
      * HTTP 日志记录配置属性
      */
+    @Data
     @ConfigurationProperties(prefix = "mc.http.logging")
     public static class HttpLoggingProperties {
 
@@ -144,7 +147,7 @@ public class HttpLoggingAutoConfiguration {
         /**
          * 请求体/响应体最大记录长度（字节）
          */
-        private int maxPayloadLength = 10 * 1024;
+        private int maxPayloadLength = 256 * 1024;
 
         /**
          * 日志格式：json 或 text
@@ -173,85 +176,6 @@ public class HttpLoggingAutoConfiguration {
 
         // Getters and Setters
 
-        public boolean isEnabled() {
-            return enabled;
-        }
-
-        public void setEnabled(boolean enabled) {
-            this.enabled = enabled;
-        }
-
-        public boolean isIncludeRequestBody() {
-            return includeRequestBody;
-        }
-
-        public void setIncludeRequestBody(boolean includeRequestBody) {
-            this.includeRequestBody = includeRequestBody;
-        }
-
-        public boolean isIncludeResponseBody() {
-            return includeResponseBody;
-        }
-
-        public void setIncludeResponseBody(boolean includeResponseBody) {
-            this.includeResponseBody = includeResponseBody;
-        }
-
-        public boolean isIncludeHeaders() {
-            return includeHeaders;
-        }
-
-        public void setIncludeHeaders(boolean includeHeaders) {
-            this.includeHeaders = includeHeaders;
-        }
-
-        public int getMaxPayloadLength() {
-            return maxPayloadLength;
-        }
-
-        public void setMaxPayloadLength(int maxPayloadLength) {
-            this.maxPayloadLength = maxPayloadLength;
-        }
-
-        public String getFormat() {
-            return format;
-        }
-
-        public void setFormat(String format) {
-            this.format = format;
-        }
-
-        public Set<String> getHeadersToRedact() {
-            return headersToRedact;
-        }
-
-        public void setHeadersToRedact(Set<String> headersToRedact) {
-            this.headersToRedact = headersToRedact;
-        }
-
-        public Set<String> getQueryParamsToRedact() {
-            return queryParamsToRedact;
-        }
-
-        public void setQueryParamsToRedact(Set<String> queryParamsToRedact) {
-            this.queryParamsToRedact = queryParamsToRedact;
-        }
-
-        public String[] getExcludePatterns() {
-            return excludePatterns;
-        }
-
-        public void setExcludePatterns(String[] excludePatterns) {
-            this.excludePatterns = excludePatterns;
-        }
-
-        public int getFilterOrder() {
-            return filterOrder;
-        }
-
-        public void setFilterOrder(int filterOrder) {
-            this.filterOrder = filterOrder;
-        }
     }
 }
 

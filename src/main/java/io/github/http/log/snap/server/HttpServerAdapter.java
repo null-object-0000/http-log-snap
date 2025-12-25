@@ -4,6 +4,7 @@ import io.github.http.log.snap.HttpLogContext;
 import io.github.http.log.snap.HttpRequestLogger;
 import io.github.http.log.snap.formatter.HttpLogFormatter;
 import io.github.http.log.snap.output.HttpLogOutput;
+import lombok.Getter;
 import lombok.NonNull;
 
 import javax.annotation.Nullable;
@@ -123,6 +124,7 @@ public interface HttpServerAdapter {
     /**
      * 适配器配置类
      */
+    @Getter
     class Config {
         /**
          * 是否记录请求体
@@ -142,7 +144,7 @@ public interface HttpServerAdapter {
         /**
          * 请求体最大记录长度
          */
-        private int maxPayloadLength = 10 * 1024;
+        private int maxPayloadLength = 256 * 1024;
 
         /**
          * 需要脱敏的请求头
@@ -171,17 +173,9 @@ public interface HttpServerAdapter {
 
         // Getters and Setters with fluent API
 
-        public boolean isIncludeRequestBody() {
-            return includeRequestBody;
-        }
-
         public Config setIncludeRequestBody(boolean includeRequestBody) {
             this.includeRequestBody = includeRequestBody;
             return this;
-        }
-
-        public boolean isIncludeResponseBody() {
-            return includeResponseBody;
         }
 
         public Config setIncludeResponseBody(boolean includeResponseBody) {
@@ -189,17 +183,9 @@ public interface HttpServerAdapter {
             return this;
         }
 
-        public boolean isIncludeHeaders() {
-            return includeHeaders;
-        }
-
         public Config setIncludeHeaders(boolean includeHeaders) {
             this.includeHeaders = includeHeaders;
             return this;
-        }
-
-        public int getMaxPayloadLength() {
-            return maxPayloadLength;
         }
 
         public Config setMaxPayloadLength(int maxPayloadLength) {
@@ -207,17 +193,9 @@ public interface HttpServerAdapter {
             return this;
         }
 
-        public Set<String> getHeadersToRedact() {
-            return headersToRedact;
-        }
-
         public Config setHeadersToRedact(Set<String> headersToRedact) {
             this.headersToRedact = headersToRedact;
             return this;
-        }
-
-        public Set<String> getExcludePatterns() {
-            return excludePatterns;
         }
 
         public Config setExcludePatterns(Set<String> excludePatterns) {
@@ -225,26 +203,14 @@ public interface HttpServerAdapter {
             return this;
         }
 
-        public Predicate<Object> getShouldLog() {
-            return shouldLog;
-        }
-
         public Config setShouldLog(Predicate<Object> shouldLog) {
             this.shouldLog = shouldLog;
             return this;
         }
 
-        public HttpLogFormatter getFormatter() {
-            return formatter;
-        }
-
         public Config setFormatter(HttpLogFormatter formatter) {
             this.formatter = formatter;
             return this;
-        }
-
-        public HttpLogOutput getOutput() {
-            return output;
         }
 
         public Config setOutput(HttpLogOutput output) {

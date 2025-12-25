@@ -83,13 +83,13 @@ public abstract class AbstractHttpLogFormatter implements HttpLogFormatter {
      * 最大请求体长度（超过则截断）
      */
     @Getter
-    protected int maxRequestBodyLength = 10 * 1024;
+    protected int maxRequestBodyLength = 256 * 1024;
 
     /**
      * 最大响应体长度（超过则截断）
      */
     @Getter
-    protected int maxResponseBodyLength = 10 * 1024;
+    protected int maxResponseBodyLength = 256 * 1024;
 
     @Override
     public final String format(@NonNull HttpLogData data) {
