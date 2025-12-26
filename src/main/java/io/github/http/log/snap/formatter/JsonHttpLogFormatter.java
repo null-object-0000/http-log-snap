@@ -6,10 +6,9 @@ import io.github.http.log.snap.HttpLogContext;
 import io.github.http.log.snap.HttpLogData;
 import io.github.http.log.snap.HttpTiming;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 
-import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.Set;
 
 /**
  * JSON 格式 HTTP 日志格式化器
@@ -17,11 +16,8 @@ import java.util.Set;
  *
  * @author http-logging
  */
-public class JsonHttpLogFormatter implements HttpLogFormatter {
-
-    private Set<String> headersToRedact = new HashSet<>();
-    private Set<String> queryParamsToRedact = new HashSet<>();
-    private String redactPlaceholder = "██";
+@Slf4j
+public class JsonHttpLogFormatter extends AbstractHttpLogFormatter {
 
     /**
      * 是否格式化输出（美化 JSON）
@@ -47,7 +43,7 @@ public class JsonHttpLogFormatter implements HttpLogFormatter {
     }
 
     @Override
-    public String format(@NonNull HttpLogData data) {
+    protected String doFormat(@NonNull HttpLogData data) {
         JSONObject json = new JSONObject(new LinkedHashMap<>());
 
         // 基本信息
@@ -102,37 +98,6 @@ public class JsonHttpLogFormatter implements HttpLogFormatter {
         return json.toJSONString();
     }
 
-    @Override
-    public HttpLogFormatter redactHeaders(Set<String> headerNames) {
-        if (headerNames != null) {
-            this.headersToRedact = new HashSet<>(headerNames);
-        }
-        return this;
-    }
-
-    /**
-     * 设置需要脱敏的查询参数名称
-     *
-     * @param paramNames 需要脱敏的查询参数名称集合
-     * @return 当前格式化器实例（支持链式调用）
-     */
-    public JsonHttpLogFormatter redactQueryParams(Set<String> paramNames) {
-        if (paramNames != null) {
-            this.queryParamsToRedact = new HashSet<>(paramNames);
-        }
-        return this;
-    }
-
-    /**
-     * 设置脱敏占位符
-     *
-     * @param placeholder 脱敏占位符
-     * @return 当前格式化器实例（支持链式调用）
-     */
-    public JsonHttpLogFormatter setRedactPlaceholder(String placeholder) {
-        this.redactPlaceholder = placeholder;
-        return this;
-    }
 
     @Override
     public String getFormatType() {
@@ -207,7 +172,11 @@ public class JsonHttpLogFormatter implements HttpLogFormatter {
             json.put("content_length", request.getContentLength());
         }
         if (request.getBody() != null) {
-            json.put("body", request.getBody());
+            // 应用格式化器的截断逻辑（如果数据收集阶段没有截断，这里会截断）
+            String originalBody = request.getBody();
+            String body = truncate(originalBody, maxRequestBodyLength);
+            
+            json.put("body", body);
             json.put("body_bytes", request.getByteCount());
         }
 
@@ -244,7 +213,11 @@ public class JsonHttpLogFormatter implements HttpLogFormatter {
             json.put("content_length", response.getContentLength());
         }
         if (response.getBody() != null) {
-            json.put("body", response.getBody());
+            // 应用格式化器的截断逻辑（如果数据收集阶段没有截断，这里会截断）
+            String originalBody = response.getBody();
+            String body = truncate(originalBody, maxResponseBodyLength);
+            
+            json.put("body", body);
             json.put("body_bytes", response.getByteCount());
         }
 
@@ -255,7 +228,7 @@ public class JsonHttpLogFormatter implements HttpLogFormatter {
         JSONObject json = new JSONObject(new LinkedHashMap<>());
         for (int i = 0; i < headers.size(); i++) {
             String name = headers.name(i);
-            String value = headersToRedact.contains(name) ? "██" : headers.value(i);
+            String value = redactHeaderValue(name, headers.value(i));
             json.put(name, value);
         }
         return json;
@@ -355,57 +328,5 @@ public class JsonHttpLogFormatter implements HttpLogFormatter {
         }
     }
 
-    /**
-     * 对 URL 中的查询参数进行脱敏
-     */
-    private String redactUrl(String url) {
-        if (url == null || queryParamsToRedact.isEmpty()) {
-            return url;
-        }
-
-        int queryStart = url.indexOf('?');
-        if (queryStart == -1) {
-            return url;
-        }
-
-        String baseUrl = url.substring(0, queryStart);
-        String queryString = url.substring(queryStart + 1);
-
-        // 处理 fragment（#后面的部分）
-        String fragment = "";
-        int fragmentStart = queryString.indexOf('#');
-        if (fragmentStart != -1) {
-            fragment = queryString.substring(fragmentStart);
-            queryString = queryString.substring(0, fragmentStart);
-        }
-
-        // 解析并脱敏查询参数
-        StringBuilder redactedQuery = new StringBuilder();
-        String[] pairs = queryString.split("&");
-        for (int i = 0; i < pairs.length; i++) {
-            if (i > 0) {
-                redactedQuery.append("&");
-            }
-
-            String pair = pairs[i];
-            int eqIndex = pair.indexOf('=');
-            if (eqIndex == -1) {
-                redactedQuery.append(pair);
-            } else {
-                String paramName = pair.substring(0, eqIndex);
-                String paramValue = pair.substring(eqIndex + 1);
-
-                redactedQuery.append(paramName).append("=");
-                if (queryParamsToRedact.contains(paramName) ||
-                        queryParamsToRedact.contains(paramName.toLowerCase())) {
-                    redactedQuery.append(redactPlaceholder);
-                } else {
-                    redactedQuery.append(paramValue);
-                }
-            }
-        }
-
-        return baseUrl + "?" + redactedQuery + fragment;
-    }
 }
 

@@ -203,16 +203,23 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
                 throw e;
         } finally {
             try {
+                // 确保响应数据已完全写入缓存
+                try {
+                    wrappedResponse.ensureFlushed();
+                } catch (IOException e) {
+                    // 忽略 flush 异常，继续记录
+                }
+                
                 // 记录响应信息（无论成功还是异常都记录）
-            recordResponse(logger, wrappedResponse);
+                recordResponse(logger, wrappedResponse);
 
-            // 结束记录
-            logger.end();
+                // 结束记录
+                logger.end();
 
-            // 输出日志
-            outputLog(logger);
-        } finally {
-            HttpRequestLoggerHolder.clear();
+                // 输出日志
+                outputLog(logger);
+            } finally {
+                HttpRequestLoggerHolder.clear();
             }
         }
     }
@@ -314,7 +321,7 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
             logger.recordResponseBodyStart();
             byte[] body = response.getCachedBody();
             String bodyString = truncateBody(body, getCharset(response));
-            logger.recordResponseBodyEnd(bodyString, body.length);
+            logger.recordResponseBodyEnd(bodyString, body != null ? body.length : 0);
         }
 
         logger.recordResponseCommitted();

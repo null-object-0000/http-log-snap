@@ -128,6 +128,63 @@ public class KafkaLogOutput implements HttpLogOutput {
 }
 ```
 
+### 处理重试后成功的场景
+
+在使用 OkHttp 等支持自动重试的 HTTP 客户端时，可能会遇到以下场景：
+- 请求过程中发生了异常（如连接中断、超时等）
+- 客户端自动重试后最终成功（返回了成功的响应，状态码 200-299）
+- 但 `HttpRequestLogger.log()` 仍然会调用 `outputError()`，因为异常信息被保留在 `HttpLogData` 中
+
+**原因：**
+`http-log-snap` 作为底层日志库，只负责**记录事实**（发生了什么），不包含业务判断逻辑。当 OkHttp 的 `EventListener` 监听到 `responseFailed` 事件时，会将异常记录到 `Response.ioe` 中，即使后续重试成功，这个异常信息也会被保留。
+
+**处理建议：**
+在自定义的 `HttpLogOutput` 实现中，根据业务需求判断是否应该将"重试后成功"的场景当作错误处理：
+
+```java
+@Override
+public void outputError(@NonNull HttpLogData data, @NonNull String formattedLog, 
+                       @NonNull Throwable error) {
+    // 检查响应是否最终成功（状态码 200-299）
+    boolean isSuccess = isResponseSuccessful(data);
+    
+    if (isSuccess) {
+        // 请求最终成功，但过程中有异常（可能是重试导致的）
+        // 根据业务需求决定如何处理：
+        // 1. 当作成功处理，使用 info 级别输出
+        // 2. 记录重试信息，便于监控和分析
+        String retryMessage = String.format("请求最终成功，但在重试过程中遇到异常: %s - %s", 
+                error.getClass().getSimpleName(), error.getMessage());
+        output(data, formattedLog + " | " + retryMessage);
+    } else {
+        // 请求最终失败，按错误处理
+        // 发送到错误 topic 或使用错误级别日志
+        producer.send(new ProducerRecord<>(topic + "-error", formattedLog));
+    }
+}
+
+/**
+ * 检查响应是否成功
+ */
+private boolean isResponseSuccessful(@NonNull HttpLogData data) {
+    HttpLogData.Response response = data.getResponse();
+    if (response == null) {
+        return false;
+    }
+    Integer code = response.getCode();
+    if (code == null) {
+        return false;
+    }
+    // HTTP 状态码 200-299 表示成功
+    return code >= 200 && code < 300;
+}
+```
+
+**设计原则：**
+- **底层库（http-log-snap）**：只负责记录事实，不做业务判断
+- **上层实现（自定义 HttpLogOutput）**：根据业务需求决定如何处理不同的场景
+- 这样设计的好处是保持底层库的通用性和灵活性，不同业务可以根据自己的需求定制处理逻辑
+
 ---
 
 ## 自定义格式化器

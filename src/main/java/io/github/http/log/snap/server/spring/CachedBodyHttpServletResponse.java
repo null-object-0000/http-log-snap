@@ -83,6 +83,20 @@ public class CachedBodyHttpServletResponse extends HttpServletResponseWrapper {
     }
 
     /**
+     * 确保所有数据都已写入缓存
+     * 在读取缓存内容前调用此方法，确保数据完整
+     */
+    public void ensureFlushed() throws IOException {
+        if (writer != null) {
+            writer.flush();
+        } else if (outputStream != null) {
+            outputStream.flush();
+        }
+        // 确保底层响应也已刷新
+        super.flushBuffer();
+    }
+
+    /**
      * 将缓存的内容写入实际响应（如果尚未写入）
      */
     public void copyBodyToResponse() throws IOException {
