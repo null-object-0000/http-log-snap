@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -70,11 +71,11 @@ public class SpringBootServerDemo {
             logger.putExtra("userId", id);
         }
 
-        return Map.of(
-                "id", id,
-                "name", "张三",
-                "email", "zhangsan@example.com"
-        );
+        Map<String, Object> result = new HashMap<>();
+        result.put("id", id);
+        result.put("name", "张三");
+        result.put("email", "zhangsan@example.com");
+        return result;
     }
 
     /**
@@ -89,11 +90,11 @@ public class SpringBootServerDemo {
                   .putExtra("product", request.get("product"));
         }
 
-        return Map.of(
-                "success", true,
-                "orderId", "ORD" + System.currentTimeMillis(),
-                "message", "订单创建成功"
-        );
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", true);
+        result.put("orderId", "ORD" + System.currentTimeMillis());
+        result.put("message", "订单创建成功");
+        return result;
     }
 
     /**

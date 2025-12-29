@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequestWrapper;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
@@ -32,7 +33,14 @@ public class CachedBodyHttpServletRequest extends HttpServletRequestWrapper {
      */
     public byte[] getCachedBody() throws IOException {
         if (!bodyRead) {
-            this.cachedBody = getRequest().getInputStream().readAllBytes();
+            ServletInputStream inputStream = getRequest().getInputStream();
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            byte[] data = new byte[8192];
+            int nRead;
+            while ((nRead = inputStream.read(data, 0, data.length)) != -1) {
+                buffer.write(data, 0, nRead);
+            }
+            this.cachedBody = buffer.toByteArray();
             this.bodyRead = true;
         }
         return cachedBody;

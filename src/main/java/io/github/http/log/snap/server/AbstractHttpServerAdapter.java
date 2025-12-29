@@ -255,7 +255,7 @@ public abstract class AbstractHttpServerAdapter implements HttpServerAdapter {
      */
     @Nullable
     protected HttpLogData.ContentType parseContentType(String contentTypeHeader) {
-        if (contentTypeHeader == null || contentTypeHeader.isBlank()) {
+        if (contentTypeHeader == null || contentTypeHeader.trim().isEmpty()) {
             return null;
         }
 

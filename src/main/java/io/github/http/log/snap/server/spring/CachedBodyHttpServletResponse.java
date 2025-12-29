@@ -46,7 +46,7 @@ public class CachedBodyHttpServletResponse extends HttpServletResponseWrapper {
      * 获取缓存的响应体字符串（指定编码）
      */
     public String getCachedBodyString(Charset charset) {
-        return cachedContent.toString(charset);
+        return new String(cachedContent.toByteArray(), charset);
     }
 
     /**

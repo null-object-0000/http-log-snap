@@ -404,7 +404,7 @@ public class HttpLogData {
 
         public String get(String name) {
             List<String> values = this.headers.get(name);
-            return (values == null || values.isEmpty()) ? null : values.getLast();
+            return (values == null || values.isEmpty()) ? null : values.get(values.size() - 1);
         }
 
         public int size() {
@@ -451,6 +451,6 @@ public class HttpLogData {
      * 判断字符串是否非空白
      */
     private static boolean isNotBlank(String str) {
-        return str != null && !str.isBlank();
+        return str != null && !str.trim().isEmpty();
     }
 }

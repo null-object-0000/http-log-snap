@@ -134,7 +134,7 @@ public final class LogStringBuilder implements Appendable, Comparable<LogStringB
      * 非空追加 - 当字符串非空时追加
      */
     public LogStringBuilder appendIfNotBlank(String str) {
-        if (str != null && !str.isBlank()) {
+        if (str != null && !str.trim().isEmpty()) {
             this.append(str);
         }
         return this;
@@ -185,7 +185,7 @@ public final class LogStringBuilder implements Appendable, Comparable<LogStringB
 
     @Override
     public int compareTo(@NonNull LogStringBuilder o) {
-        return logs.compareTo(o.logs);
+        return logs.toString().compareTo(o.logs.toString());
     }
 
     // ==================== 其他工具方法 ====================
@@ -194,7 +194,7 @@ public final class LogStringBuilder implements Appendable, Comparable<LogStringB
      * 检查是否为空
      */
     public boolean isEmpty() {
-        return logs.isEmpty();
+        return logs.length() == 0;
     }
 
     /**

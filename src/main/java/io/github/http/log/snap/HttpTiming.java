@@ -200,7 +200,7 @@ public class HttpTiming {
         // 按步骤顺序遍历（现在是 O(1) 访问）
         for (int step = 1; step <= totalSteps; step++) {
             Optional<EventRecord> recordOpt = getEventRecordByStep(step);
-            if (recordOpt.isEmpty()) {
+            if (!recordOpt.isPresent()) {
                 continue;
             }
 
@@ -362,7 +362,7 @@ public class HttpTiming {
          */
         public long executionFinalization() {
             Optional<EventRecord> begin = timing.getEventRecord(HttpRequestLogger.class, HttpEvent.RESPONSE_BODY_END);
-            if (begin.isEmpty()) {
+            if (!begin.isPresent()) {
                 begin = timing.getEventRecord(HttpRequestLogger.class, HttpEvent.RESPONSE_HEADERS_END);
             }
             Optional<EventRecord> end = timing.getLastEventRecord();
