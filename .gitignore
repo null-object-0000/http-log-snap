@@ -25,13 +25,8 @@ replay_pid*
 
 .idea/
 target/
-.idea/artifacts/market_alert_war.xml
-.idea/artifacts/market_alert_war_exploded.xml
-.idea/compiler.xml
-.idea/encodings.xml
-.idea/misc.xml
-.idea/modules.xml
-.idea/vcs.xml
-.mvn/wrapper/maven-wrapper.jar
-.mvn/wrapper/maven-wrapper.properties
+.idea/
+.mvn/
 logger.iml
+
+.vscode/
