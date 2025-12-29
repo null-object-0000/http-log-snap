@@ -3,22 +3,18 @@ package io.github.http.log.snap.server.spring;
 import io.github.http.log.snap.formatter.JsonHttpLogFormatter;
 import io.github.http.log.snap.formatter.TextHttpLogFormatter;
 import jakarta.servlet.Filter;
-import lombok.Data;
 import lombok.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.util.Set;
 
 /**
  * HTTP 日志记录自动配置
@@ -31,6 +27,7 @@ import java.util.Set;
  * mc.http.logging.include-headers=true            # 是否记录请求头
  * mc.http.logging.max-payload-length=10240        # 最大记录长度
  * mc.http.logging.format=json                     # 日志格式：json/text
+ * mc.http.logging.include-events=true             # 是否包含事件序列（仅 JSON 格式有效）
  * mc.http.logging.exclude-patterns=/health,/actuator/**  # 排除的 URL
  * </pre>
  *
@@ -39,7 +36,7 @@ import java.util.Set;
 @Configuration
 @ConditionalOnClass({Filter.class})
 @ConditionalOnProperty(prefix = "mc.http.logging", name = "enabled", havingValue = "true", matchIfMissing = false)
-@EnableConfigurationProperties(HttpLoggingAutoConfiguration.HttpLoggingProperties.class)
+@EnableConfigurationProperties(HttpLoggingProperties.class)
 public class HttpLoggingAutoConfiguration {
 
     @Bean
@@ -61,7 +58,9 @@ public class HttpLoggingAutoConfiguration {
 
         // 配置格式化器（TextHttpLogFormatter 会根据 HttpDirection 自动选择格式）
         if ("json".equalsIgnoreCase(properties.getFormat())) {
-            filter.setFormatter(new JsonHttpLogFormatter());
+            JsonHttpLogFormatter jsonFormatter = new JsonHttpLogFormatter();
+            jsonFormatter.setIncludeEvents(properties.isIncludeEvents());
+            filter.setFormatter(jsonFormatter);
         } else {
             filter.setFormatter(new TextHttpLogFormatter());
         }
@@ -117,65 +116,5 @@ public class HttpLoggingAutoConfiguration {
         };
     }
 
-    /**
-     * HTTP 日志记录配置属性
-     */
-    @Data
-    @ConfigurationProperties(prefix = "mc.http.logging")
-    public static class HttpLoggingProperties {
-
-        /**
-         * 是否启用 HTTP 日志记录
-         */
-        private boolean enabled = false;
-
-        /**
-         * 是否记录请求体
-         */
-        private boolean includeRequestBody = true;
-
-        /**
-         * 是否记录响应体
-         */
-        private boolean includeResponseBody = true;
-
-        /**
-         * 是否记录请求头
-         */
-        private boolean includeHeaders = true;
-
-        /**
-         * 请求体/响应体最大记录长度（字节，-1 表示无限制）
-         */
-        private int maxPayloadLength = -1;
-
-        /**
-         * 日志格式：json 或 text
-         */
-        private String format = "json";
-
-        /**
-         * 需要脱敏的请求头名称
-         */
-        private Set<String> headersToRedact;
-
-        /**
-         * 需要脱敏的查询参数名称
-         */
-        private Set<String> queryParamsToRedact;
-
-        /**
-         * 需要排除的 URL 模式（支持 ant 风格）
-         */
-        private String[] excludePatterns;
-
-        /**
-         * Filter 顺序（默认最高优先级）
-         */
-        private int filterOrder = Ordered.HIGHEST_PRECEDENCE + 10;
-
-        // Getters and Setters
-
-    }
 }
 
