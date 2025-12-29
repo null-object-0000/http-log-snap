@@ -106,7 +106,7 @@ public class TextHttpLogFormatter implements HttpLogFormatter {
         logs.line().append(getEventTime(timing, HttpEvent.START)).space().append("--- START [SERVER]");
 
         // 接口名称
-        if (context != null && isNotBlank(context.getInterfaceName())) {
+        if (context != null && StringUtils.isNotBlank(context.getInterfaceName())) {
             logs.append(" %s", context.getInterfaceName());
         }
 
@@ -119,7 +119,7 @@ public class TextHttpLogFormatter implements HttpLogFormatter {
         logs.append(" (total: %dms)", data.getTotalTimeMs());
 
         // 客户端 IP（同一行）
-        if (isNotBlank(data.getRemoteAddress())) {
+        if (StringUtils.isNotBlank(data.getRemoteAddress())) {
             logs.append(" [client: %s]", data.getRemoteAddress());
         }
 
@@ -145,7 +145,7 @@ public class TextHttpLogFormatter implements HttpLogFormatter {
         }
 
         // 接口名称
-        if (context != null && isNotBlank(context.getInterfaceName())) {
+        if (context != null && StringUtils.isNotBlank(context.getInterfaceName())) {
             logs.append(" %s", context.getInterfaceName());
         }
 
@@ -207,11 +207,11 @@ public class TextHttpLogFormatter implements HttpLogFormatter {
             logs.line().append(time).space().append("--> CONNECTING (%dms)", connection);
 
             // 显示连接地址信息（同一行）
-            if (isNotBlank(data.getLocalAddress()) && isNotBlank(data.getRemoteAddress())) {
+            if (StringUtils.isNotBlank(data.getLocalAddress()) && StringUtils.isNotBlank(data.getRemoteAddress())) {
                 logs.append(" [%s -> %s]", data.getLocalAddress(), data.getRemoteAddress());
-            } else if (isNotBlank(data.getRemoteAddress())) {
+            } else if (StringUtils.isNotBlank(data.getRemoteAddress())) {
                 logs.append(" [-> %s]", data.getRemoteAddress());
-            } else if (isNotBlank(data.getLocalAddress())) {
+            } else if (StringUtils.isNotBlank(data.getLocalAddress())) {
                 logs.append(" [%s ->]", data.getLocalAddress());
             }
         }
@@ -240,7 +240,7 @@ public class TextHttpLogFormatter implements HttpLogFormatter {
                 .appendLine("--> REQUEST START --------------------------------------------------->")
                 .append("%s %s", request.getMethod(), originalUrl);
 
-        if (isNotBlank(request.getProtocol())) {
+        if (StringUtils.isNotBlank(request.getProtocol())) {
             logs.append(" %s", request.getProtocol());
         }
         logs.line();
@@ -306,7 +306,7 @@ public class TextHttpLogFormatter implements HttpLogFormatter {
             logs.append(endTime).space().appendLine("--> END REQUEST (%s, one-shot body omitted)", requestTime);
         } else {
             String body = request.getBody();
-            if (isNotBlank(body)) {
+            if (StringUtils.isNotBlank(body)) {
                 logs.line().appendLine(body);
             }
 
@@ -345,7 +345,7 @@ public class TextHttpLogFormatter implements HttpLogFormatter {
             logs.append("%s ", resp.getProtocol());
         }
         logs.append("%s", resp.getCode());
-        if (isNotBlank(resp.getMessage())) {
+        if (StringUtils.isNotBlank(resp.getMessage())) {
             logs.append(" %s", resp.getMessage());
         }
 
@@ -390,7 +390,7 @@ public class TextHttpLogFormatter implements HttpLogFormatter {
         } else {
             // 输出响应体
             String body = resp.getBody();
-            if (isNotBlank(body)) {
+            if (StringUtils.isNotBlank(body)) {
                 logs.line().append(body);
             }
 
@@ -539,11 +539,5 @@ public class TextHttpLogFormatter implements HttpLogFormatter {
         return -1L;
     }
 
-    /**
-     * 判断字符串是否非空白
-     */
-    private static boolean isNotBlank(String str) {
-        return str != null && !str.trim().isEmpty();
-    }
 }
 

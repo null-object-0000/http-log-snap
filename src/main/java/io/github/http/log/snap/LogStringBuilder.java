@@ -134,7 +134,7 @@ public final class LogStringBuilder implements Appendable, Comparable<LogStringB
      * 非空追加 - 当字符串非空时追加
      */
     public LogStringBuilder appendIfNotBlank(String str) {
-        if (str != null && !str.trim().isEmpty()) {
+        if (StringUtils.isNotBlank(str)) {
             this.append(str);
         }
         return this;

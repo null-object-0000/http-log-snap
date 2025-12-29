@@ -3,6 +3,7 @@ package io.github.http.log.snap.server;
 import io.github.http.log.snap.HttpLogContext;
 import io.github.http.log.snap.HttpLogData;
 import io.github.http.log.snap.HttpRequestLogger;
+import io.github.http.log.snap.StringUtils;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -255,7 +256,7 @@ public abstract class AbstractHttpServerAdapter implements HttpServerAdapter {
      */
     @Nullable
     protected HttpLogData.ContentType parseContentType(String contentTypeHeader) {
-        if (contentTypeHeader == null || contentTypeHeader.trim().isEmpty()) {
+        if (StringUtils.isBlank(contentTypeHeader)) {
             return null;
         }
 
