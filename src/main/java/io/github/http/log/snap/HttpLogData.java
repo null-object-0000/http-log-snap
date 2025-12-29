@@ -273,10 +273,10 @@ public class HttpLogData {
         public Request merge(@Nullable Request other) {
             if (other == null) return this;
 
-            if (isNotBlank(other.getMethod())) this.method = other.getMethod();
-            if (isNotBlank(other.getUrl())) this.url = other.getUrl();
-            if (isNotBlank(other.getUrlWithoutQuery())) this.urlWithoutQuery = other.getUrlWithoutQuery();
-            if (isNotBlank(other.getProtocol())) this.protocol = other.getProtocol();
+            if (StringUtils.isNotBlank(other.getMethod())) this.method = other.getMethod();
+            if (StringUtils.isNotBlank(other.getUrl())) this.url = other.getUrl();
+            if (StringUtils.isNotBlank(other.getUrlWithoutQuery())) this.urlWithoutQuery = other.getUrlWithoutQuery();
+            if (StringUtils.isNotBlank(other.getProtocol())) this.protocol = other.getProtocol();
             if (other.getProxy() != null) this.proxy = other.getProxy();
             if (other.getContentType() != null) this.contentType = other.getContentType();
             if (other.getContentLength() != null) this.contentLength = other.getContentLength();
@@ -372,9 +372,9 @@ public class HttpLogData {
         public Response merge(@Nullable Response other) {
             if (other == null) return this;
 
-            if (isNotBlank(other.getProtocol())) this.protocol = other.getProtocol();
+            if (StringUtils.isNotBlank(other.getProtocol())) this.protocol = other.getProtocol();
             if (other.getCode() != null) this.code = other.getCode();
-            if (isNotBlank(other.getMessage())) this.message = other.getMessage();
+            if (StringUtils.isNotBlank(other.getMessage())) this.message = other.getMessage();
             if (other.getContentType() != null) this.contentType = other.getContentType();
             if (other.getContentLength() != null) this.contentLength = other.getContentLength();
             if (other.getHeaders() != null) this.headers = other.getHeaders();
@@ -445,12 +445,4 @@ public class HttpLogData {
         }
     }
 
-    // ==================== 内部工具方法 ====================
-
-    /**
-     * 判断字符串是否非空白
-     */
-    private static boolean isNotBlank(String str) {
-        return str != null && !str.trim().isEmpty();
-    }
 }
