@@ -543,7 +543,7 @@ public class TextHttpLogFormatter implements HttpLogFormatter {
      * 判断字符串是否非空白
      */
     private static boolean isNotBlank(String str) {
-        return str != null && !str.isBlank();
+        return str != null && !str.trim().isEmpty();
     }
 }
 

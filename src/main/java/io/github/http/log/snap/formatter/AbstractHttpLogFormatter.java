@@ -304,14 +304,14 @@ public abstract class AbstractHttpLogFormatter implements HttpLogFormatter {
      * 判断字符串是否非空白
      */
     protected static boolean isNotBlank(String str) {
-        return str != null && !str.isBlank();
+        return str != null && !str.trim().isEmpty();
     }
 
     /**
      * 判断字符串是否为空白
      */
     protected static boolean isBlank(String str) {
-        return str == null || str.isBlank();
+        return str == null || str.trim().isEmpty();
     }
 }
 

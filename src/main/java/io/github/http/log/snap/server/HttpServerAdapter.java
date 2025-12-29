@@ -8,6 +8,9 @@ import lombok.Getter;
 import lombok.NonNull;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -149,12 +152,12 @@ public interface HttpServerAdapter {
         /**
          * 需要脱敏的请求头
          */
-        private Set<String> headersToRedact = Set.of("Authorization", "Cookie", "Set-Cookie");
+        private Set<String> headersToRedact = Collections.unmodifiableSet(new HashSet<>(Arrays.asList("Authorization", "Cookie", "Set-Cookie")));
 
         /**
          * 需要排除的 URL 模式
          */
-        private Set<String> excludePatterns = Set.of();
+        private Set<String> excludePatterns = Collections.emptySet();
 
         /**
          * 自定义过滤条件

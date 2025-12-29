@@ -51,9 +51,9 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
     /**
      * 默认需要脱敏的请求头
      */
-    private static final Set<String> DEFAULT_HEADERS_TO_REDACT = Set.of(
+    private static final Set<String> DEFAULT_HEADERS_TO_REDACT = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
             "Authorization", "Cookie", "Set-Cookie", "X-Auth-Token"
-    );
+    )));
 
     /**
      * 是否记录请求体

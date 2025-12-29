@@ -404,7 +404,7 @@ public class HttpLogData {
 
         public String get(String name) {
             List<String> values = this.headers.get(name);
-            return (values == null || values.isEmpty()) ? null : values.getLast();
+            return (values == null || values.isEmpty()) ? null : values.get(values.size() - 1);
         }
 
         public int size() {
