@@ -362,7 +362,7 @@ public class HttpTiming {
          */
         public long executionFinalization() {
             Optional<EventRecord> begin = timing.getEventRecord(HttpRequestLogger.class, HttpEvent.RESPONSE_BODY_END);
-            if (begin.isEmpty()) {
+            if (!begin.isPresent()) {
                 begin = timing.getEventRecord(HttpRequestLogger.class, HttpEvent.RESPONSE_HEADERS_END);
             }
             Optional<EventRecord> end = timing.getLastEventRecord();
