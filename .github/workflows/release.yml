@@ -33,10 +33,10 @@ jobs:
             echo "Manual trigger - Version: ${{ github.event.inputs.version }}"
           fi
 
-      - name: Set up JDK 21
+      - name: Set up JDK 8
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
+          java-version: '8'
           distribution: 'temurin'
           server-id: central
           server-username: ${{ secrets.CENTRAL_USERNAME }}
