@@ -341,10 +341,10 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
             }
             // 设置查询参数脱敏
             if (!queryParamsToRedact.isEmpty()) {
-                if (logFormatter instanceof TextHttpLogFormatter textFormatter) {
-                    textFormatter.redactQueryParams(queryParamsToRedact);
-                } else if (logFormatter instanceof JsonHttpLogFormatter jsonFormatter) {
-                    jsonFormatter.redactQueryParams(queryParamsToRedact);
+                if (logFormatter instanceof TextHttpLogFormatter) {
+                    ((TextHttpLogFormatter) logFormatter).redactQueryParams(queryParamsToRedact);
+                } else if (logFormatter instanceof JsonHttpLogFormatter) {
+                    ((JsonHttpLogFormatter) logFormatter).redactQueryParams(queryParamsToRedact);
                 }
             }
         }
@@ -465,23 +465,38 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
     }
 
     private String getStatusMessage(int status) {
-        return switch (status) {
-            case 200 -> "OK";
-            case 201 -> "Created";
-            case 204 -> "No Content";
-            case 301 -> "Moved Permanently";
-            case 302 -> "Found";
-            case 304 -> "Not Modified";
-            case 400 -> "Bad Request";
-            case 401 -> "Unauthorized";
-            case 403 -> "Forbidden";
-            case 404 -> "Not Found";
-            case 405 -> "Method Not Allowed";
-            case 500 -> "Internal Server Error";
-            case 502 -> "Bad Gateway";
-            case 503 -> "Service Unavailable";
-            default -> "";
-        };
+        switch (status) {
+            case 200:
+                return "OK";
+            case 201:
+                return "Created";
+            case 204:
+                return "No Content";
+            case 301:
+                return "Moved Permanently";
+            case 302:
+                return "Found";
+            case 304:
+                return "Not Modified";
+            case 400:
+                return "Bad Request";
+            case 401:
+                return "Unauthorized";
+            case 403:
+                return "Forbidden";
+            case 404:
+                return "Not Found";
+            case 405:
+                return "Method Not Allowed";
+            case 500:
+                return "Internal Server Error";
+            case 502:
+                return "Bad Gateway";
+            case 503:
+                return "Service Unavailable";
+            default:
+                return "";
+        }
     }
 
     private boolean matchesPattern(String uri, String pattern) {

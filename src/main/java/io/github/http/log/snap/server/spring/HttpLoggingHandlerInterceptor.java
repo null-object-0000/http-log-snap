@@ -41,7 +41,8 @@ public class HttpLoggingHandlerInterceptor implements HandlerInterceptor {
         }
 
         // 记录 Handler 信息
-        if (handler instanceof HandlerMethod handlerMethod) {
+        if (handler instanceof HandlerMethod) {
+            HandlerMethod handlerMethod = (HandlerMethod) handler;
             Class<?> handlerClass = handlerMethod.getBeanType();
             String methodName = handlerMethod.getMethod().getName();
             logger.recordHandlerStart(handlerClass, methodName);

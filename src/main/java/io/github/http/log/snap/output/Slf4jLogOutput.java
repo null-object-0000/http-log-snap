@@ -64,22 +64,42 @@ public class Slf4jLogOutput implements HttpLogOutput {
     @Override
     public void output(@NonNull HttpLogData data, @NonNull String formattedLog) {
         switch (level) {
-            case TRACE -> logger.trace(formattedLog);
-            case DEBUG -> logger.debug(formattedLog);
-            case INFO -> logger.info(formattedLog);
-            case WARN -> logger.warn(formattedLog);
-            case ERROR -> logger.error(formattedLog);
+            case TRACE:
+                logger.trace(formattedLog);
+                break;
+            case DEBUG:
+                logger.debug(formattedLog);
+                break;
+            case INFO:
+                logger.info(formattedLog);
+                break;
+            case WARN:
+                logger.warn(formattedLog);
+                break;
+            case ERROR:
+                logger.error(formattedLog);
+                break;
         }
     }
 
     @Override
     public void outputError(@NonNull HttpLogData data, @NonNull String formattedLog, @NonNull Throwable error) {
         switch (level) {
-            case TRACE -> logger.trace(formattedLog, error);
-            case DEBUG -> logger.debug(formattedLog, error);
-            case INFO -> logger.info(formattedLog, error);
-            case WARN -> logger.warn(formattedLog, error);
-            case ERROR -> logger.error(formattedLog, error);
+            case TRACE:
+                logger.trace(formattedLog, error);
+                break;
+            case DEBUG:
+                logger.debug(formattedLog, error);
+                break;
+            case INFO:
+                logger.info(formattedLog, error);
+                break;
+            case WARN:
+                logger.warn(formattedLog, error);
+                break;
+            case ERROR:
+                logger.error(formattedLog, error);
+                break;
         }
     }
 
@@ -90,13 +110,20 @@ public class Slf4jLogOutput implements HttpLogOutput {
 
     @Override
     public boolean isEnabled() {
-        return switch (level) {
-            case TRACE -> logger.isTraceEnabled();
-            case DEBUG -> logger.isDebugEnabled();
-            case INFO -> logger.isInfoEnabled();
-            case WARN -> logger.isWarnEnabled();
-            case ERROR -> logger.isErrorEnabled();
-        };
+        switch (level) {
+            case TRACE:
+                return logger.isTraceEnabled();
+            case DEBUG:
+                return logger.isDebugEnabled();
+            case INFO:
+                return logger.isInfoEnabled();
+            case WARN:
+                return logger.isWarnEnabled();
+            case ERROR:
+                return logger.isErrorEnabled();
+            default:
+                return false;
+        }
     }
 }
 

@@ -137,10 +137,12 @@ public class OkHttpLoggingEventListener extends EventListener {
         // 记录连接的本地和远程地址
         try {
             java.net.Socket socket = connection.socket();
-            if (socket.getLocalSocketAddress() instanceof InetSocketAddress local) {
+            if (socket.getLocalSocketAddress() instanceof InetSocketAddress) {
+                InetSocketAddress local = (InetSocketAddress) socket.getLocalSocketAddress();
                 logger.setLocalAddress(local.getAddress().getHostAddress() + ":" + local.getPort());
             }
-            if (socket.getRemoteSocketAddress() instanceof InetSocketAddress remote) {
+            if (socket.getRemoteSocketAddress() instanceof InetSocketAddress) {
+                InetSocketAddress remote = (InetSocketAddress) socket.getRemoteSocketAddress();
                 logger.setRemoteAddress(remote.getAddress().getHostAddress() + ":" + remote.getPort());
             }
         } catch (Exception ignored) {

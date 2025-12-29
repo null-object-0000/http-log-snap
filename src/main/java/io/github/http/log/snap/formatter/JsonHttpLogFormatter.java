@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import javax.annotation.Nullable;
 
 import java.util.LinkedHashMap;
+import java.util.Optional;
 
 /**
  * JSON 格式 HTTP 日志格式化器
@@ -296,7 +297,7 @@ public class JsonHttpLogFormatter extends AbstractHttpLogFormatter {
 
         // 按步骤顺序遍历所有事件
         for (int step = 1; ; step++) {
-            var recordOpt = timing.getEventRecordByStep(step);
+            Optional<HttpTiming.EventRecord> recordOpt = timing.getEventRecordByStep(step);
             if (recordOpt.isEmpty()) {
                 break;
             }
