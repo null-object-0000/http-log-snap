@@ -22,12 +22,12 @@ import lombok.NonNull;
  *
  *     &#64;Override
  *     public void output(HttpLogData data, String formattedLog) {
- *         producer.send(new ProducerRecord<>(topic, formattedLog));
+ *         producer.send(new ProducerRecord&lt;&gt;(topic, formattedLog));
  *     }
  *
  *     &#64;Override
  *     public void outputError(HttpLogData data, String formattedLog, Throwable error) {
- *         producer.send(new ProducerRecord<>(topic + "-error", formattedLog));
+ *         producer.send(new ProducerRecord&lt;&gt;(topic + "-error", formattedLog));
  *     }
  * }
  * </pre>
