@@ -48,13 +48,30 @@ jobs:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: |
           if [ -n "$GPG_PRIVATE_KEY" ]; then
+            # 创建 GPG 目录
+            mkdir -p ~/.gnupg
+            chmod 700 ~/.gnupg
+            
+            # 配置 GPG 以在批处理模式下工作（不使用代理）
+            echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
+            echo "batch" >> ~/.gnupg/gpg.conf
+            echo "no-tty" >> ~/.gnupg/gpg.conf
+            
             # 尝试直接导入（ASCII armor 格式）
             if echo "$GPG_PRIVATE_KEY" | grep -q "BEGIN PGP"; then
-              echo "$GPG_PRIVATE_KEY" | gpg --batch --import
+              echo "$GPG_PRIVATE_KEY" | gpg --batch --yes --import
             else
               # 如果是 Base64 编码，先解码再导入
-              echo "$GPG_PRIVATE_KEY" | base64 --decode | gpg --batch --import
+              echo "$GPG_PRIVATE_KEY" | base64 --decode | gpg --batch --yes --import
             fi
+            
+            # 信任密钥（避免交互式提示）
+            KEY_ID=$(gpg --list-secret-keys --keyid-format LONG | grep -E "sec\s+" | head -1 | awk '{print $2}' | cut -d'/' -f2)
+            if [ -n "$KEY_ID" ]; then
+              echo "$KEY_ID:6:" | gpg --import-ownertrust
+            fi
+            
+            # 列出密钥以验证导入
             gpg --list-secret-keys --keyid-format LONG
           fi
 
@@ -72,6 +89,8 @@ jobs:
           mvn clean deploy \
             -DskipTests=false \
             -Dmaven.test.skip=false \
+            -Dgpg.passphrase=$GPG_PASSPHRASE \
+            -Dgpg.useagent=false \
             -DaltSnapshotDeploymentRepository=central::default::https://s01.oss.sonatype.org/content/repositories/snapshots \
             -DaltReleaseDeploymentRepository=central::default::https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/
 
