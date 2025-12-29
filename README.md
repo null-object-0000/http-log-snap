@@ -23,7 +23,7 @@
 
 ## 📦 安装
 
-**JDK 21 版本：**
+### JDK 21 版本
 
 ```xml
 <dependency>
@@ -33,7 +33,19 @@
 </dependency>
 ```
 
-> **💡 提示：** 如果你的项目使用 JDK 8，请使用 `http-log-snap-jdk8` 依赖。
+### JDK 8 版本
+
+```xml
+<dependency>
+    <groupId>io.github.null-object-0000</groupId>
+    <artifactId>http-log-snap-jdk8</artifactId>
+    <version>0.0.10</version>
+</dependency>
+```
+
+> **💡 提示：** 
+> - 如果你的项目使用 **JDK 21**，请使用 `http-log-snap` 依赖（当前仓库）
+> - 如果你的项目使用 **JDK 8**，请使用 `http-log-snap-jdk8` 依赖（[support-jdk8 分支](https://github.com/null-object-0000/http-log-snap/tree/support-jdk8)）
 
 ## 🚀 30 秒上手
 
