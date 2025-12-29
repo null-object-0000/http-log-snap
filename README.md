@@ -5,6 +5,8 @@
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 ![GitHub stars](https://img.shields.io/github/stars/null-object-0000/http-log-snap?style=social)
 
+> **📌 版本说明：** 这是 **JDK 21** 版本。如果你的项目使用 **JDK 8**，请使用 [http-log-snap-jdk8](../http-log-snap-jdk1.8) 版本。
+
 一个轻量级的 Java HTTP 请求/响应日志记录库，**快照式**捕获完整的 HTTP 交互。
 
 同时支持 **客户端**（OkHttp）和 **服务端**（Spring MVC）场景。
@@ -21,6 +23,8 @@
 
 ## 📦 安装
 
+**JDK 21 版本：**
+
 ```xml
 <dependency>
     <groupId>io.github.null-object-0000</groupId>
@@ -28,6 +32,8 @@
     <version>0.0.10</version>
 </dependency>
 ```
+
+> **💡 提示：** 如果你的项目使用 JDK 8，请使用 `http-log-snap-jdk8` 依赖。
 
 ## 🚀 30 秒上手
 
