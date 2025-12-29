@@ -87,7 +87,7 @@ public class SpringBootServerDemo {
         HttpRequestLogger logger = HttpRequestLoggerHolder.get();
         if (logger != null) {
             logger.putExtra("orderId", "ORD" + System.currentTimeMillis())
-                  .putExtra("product", request.get("product"));
+                    .putExtra("product", request.get("product"));
         }
 
         Map<String, Object> result = new HashMap<>();
