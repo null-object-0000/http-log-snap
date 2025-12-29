@@ -40,18 +40,18 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
 
         <!-- Dependency Versions -->
-        <lombok.version>1.18.42</lombok.version>
-        <slf4j.version>2.0.17</slf4j.version>
+        <lombok.version>1.18.30</lombok.version>
+        <slf4j.version>1.7.36</slf4j.version>
         <fastjson2.version>2.0.60</fastjson2.version>
         <okhttp.version>5.3.0</okhttp.version>
-        <spring.version>6.2.14</spring.version>
-        <spring-boot.version>3.5.8</spring-boot.version>
-        <servlet.version>6.1.0</servlet.version>
-        <junit.version>5.11.4</junit.version>
+        <spring.version>5.3.31</spring.version>
+        <spring-boot.version>2.7.18</spring-boot.version>
+        <servlet.version>4.0.1</servlet.version>
+        <junit.version>5.10.2</junit.version>
     </properties>
 
     <dependencies>
@@ -136,8 +136,8 @@
 
         <!-- Servlet API (可选，用于服务端日志记录) -->
         <dependency>
-            <groupId>jakarta.servlet</groupId>
-            <artifactId>jakarta.servlet-api</artifactId>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
             <version>${servlet.version}</version>
             <optional>true</optional>
             <scope>provided</scope>
@@ -155,7 +155,7 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.5.21</version>
+            <version>1.2.12</version>
             <scope>test</scope>
         </dependency>
 
@@ -195,7 +195,7 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>5.14.2</version>
+            <version>4.11.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

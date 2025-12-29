@@ -26,7 +26,7 @@
 | Lombok | 1.18.42 | 1.18.30 | 使用支持 JDK 1.8 的最新版本 |
 | SLF4J | 2.0.17 | 1.7.36 | SLF4J 2.x 需要 Java 11+ |
 | Fastjson2 | 2.0.60 | 2.0.60 | 保持，Fastjson2 支持 JDK 1.8 |
-| OkHttp | 5.3.0 | 4.12.0 | OkHttp 5.x 需要 Java 11+ |
+| OkHttp | 5.3.0 | 5.3.0 | OkHttp 5.3.0 支持 Java 8+，无需降级 |
 | Spring | 6.2.14 | 5.3.31 | Spring 6.x 需要 Java 17+ |
 | Spring Boot | 3.5.8 | 2.7.18 | Spring Boot 3.x 需要 Java 17+ |
 | Servlet API | 6.1.0 (Jakarta) | 4.0.1 (javax) | Jakarta EE 9+ 需要 Java 11+ |
@@ -172,7 +172,7 @@ Get-ChildItem -Path src/main/java -Recurse -Filter *.java | ForEach-Object {
 ## ⚠️ 重要注意事项
 
 1. **Spring Boot 2.7.x 是最后一个支持 JDK 1.8 的版本**，后续版本不再支持。
-2. **OkHttp 4.12.0 是最后一个支持 JDK 1.8 的版本**，OkHttp 5.x 需要 Java 11+。
+2. **OkHttp 5.3.0 支持 Java 8+**，无需降级版本。
 3. **SLF4J 1.7.36 是最后一个支持 JDK 1.8 的版本**，SLF4J 2.x 需要 Java 11+。
 4. **Jakarta EE 9+ 需要 Java 11+**，JDK 1.8 只能使用 javax.servlet。
 5. **语法特性已兼容**：主分支中的 instanceof 模式匹配、switch 表达式、var 关键字已经全部改为兼容写法，无需在 JDK 1.8 分支中再次修改。

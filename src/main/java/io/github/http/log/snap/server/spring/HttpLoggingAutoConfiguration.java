@@ -2,7 +2,7 @@ package io.github.http.log.snap.server.spring;
 
 import io.github.http.log.snap.formatter.JsonHttpLogFormatter;
 import io.github.http.log.snap.formatter.TextHttpLogFormatter;
-import jakarta.servlet.Filter;
+import javax.servlet.Filter;
 import lombok.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;

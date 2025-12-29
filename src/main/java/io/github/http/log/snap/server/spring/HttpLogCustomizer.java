@@ -1,7 +1,7 @@
 package io.github.http.log.snap.server.spring;
 
 import io.github.http.log.snap.HttpRequestLogger;
-import jakarta.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * HTTP 日志定制器

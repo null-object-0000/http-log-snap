@@ -3,7 +3,7 @@ package io.github.http.log.snap.demo;
 import io.github.http.log.snap.HttpRequestLogger;
 import io.github.http.log.snap.server.spring.HttpLogCustomizer;
 import io.github.http.log.snap.server.spring.HttpRequestLoggerHolder;
-import jakarta.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequest;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.stereotype.Component;
