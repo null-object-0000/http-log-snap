@@ -156,10 +156,12 @@ public class JsonHttpLogFormatter extends AbstractHttpLogFormatter {
 
         json.put("method", request.getMethod());
         // 原始 URL（经过脱敏处理）
-        json.put("url", redactUrl(request.getUrl()));
+        String originalUrl = redactUrl(request.getUrl());
+        json.put("url", originalUrl);
         // 规范化后的 URL（根据上下文配置决定使用自定义占位符或默认 {id}）
+        // 如果规范化后的 URL 与原始 URL 一致，则不写入 normalized_url 字段，避免冗余
         String normalizedUrl = request.getNormalizedUrl(context);
-        if (normalizedUrl != null) {
+        if (normalizedUrl != null && !normalizedUrl.equals(originalUrl)) {
             json.put("normalized_url", normalizedUrl);
         }
         if (request.getProtocol() != null) {

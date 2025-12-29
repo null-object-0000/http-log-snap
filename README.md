@@ -19,7 +19,7 @@
 <dependency>
     <groupId>io.github.null-object-0000</groupId>
     <artifactId>http-log-snap</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.10</version>
 </dependency>
 ```
 
@@ -238,6 +238,7 @@ mc:
 
 - [📖 使用指南](docs/guide.md) - 完整的使用教程
 - [🔧 高级用法](docs/advanced.md) - 自定义格式化器、输出目标、适配器
+- [📋 版本记录](CHANGELOG.md) - 查看所有版本的更新内容
 - 💡 接入示例 - 在 IDE 中直接运行：
   - OkHttp 客户端: `src/test/java/.../demo/OkHttpClientDemo.java`
   - Spring Boot 服务端: `src/test/java/.../demo/SpringBootServerDemo.java`
