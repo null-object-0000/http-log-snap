@@ -65,12 +65,7 @@ jobs:
               echo "$GPG_PRIVATE_KEY" | base64 --decode | gpg --batch --yes --import
             fi
             
-            # 信任密钥（避免交互式提示）
-            KEY_ID=$(gpg --list-secret-keys --keyid-format LONG | grep -E "sec\s+" | head -1 | awk '{print $2}' | cut -d'/' -f2)
-            if [ -n "$KEY_ID" ]; then
-              echo "$KEY_ID:6:" | gpg --import-ownertrust
-            fi
-            
+            # 在 CI 环境中不需要显式信任密钥，GPG 会自动使用导入的密钥
             # 列出密钥以验证导入
             gpg --list-secret-keys --keyid-format LONG
           fi
