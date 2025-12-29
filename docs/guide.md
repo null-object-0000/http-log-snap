@@ -134,9 +134,12 @@ OkHttpClient client = new OkHttpClient.Builder()
     .eventListenerFactory(OkHttpLoggingEventListener.FACTORY)
     .build();
 
-// 2. 创建 logger 并记录请求体
+// 2. 创建 logger 并记录请求体（可配置 URL 规范化占位符）
 HttpRequestLogger logger = HttpRequestLogger.forClient(
-    HttpLogContext.of("创建用户")
+    HttpLogContext.builder()
+        .interfaceName("创建用户")
+        .urlPlaceholders("{userId}")  // 配置 URL 规范化占位符（可选）
+        .build()
 );
 String requestBody = "{\"name\":\"张三\",\"age\":25}";
 logger.start(requestBody);  // 记录请求体
@@ -172,11 +175,12 @@ mc:
   http:
     logging:
       enabled: true
-      format: text                    # 或 json
+      format: json                    # json 或 text（默认 json）
       include-request-body: true
       include-response-body: true
       include-headers: true
-      max-payload-length: 10240       # 最大记录长度（字节）
+      include-events: false           # 是否包含完整事件序列（仅 JSON 格式有效）
+      max-payload-length: -1           # 最大记录长度（字节，-1 表示无限制）
       exclude-patterns:               # 排除的 URL
         - /actuator/**
         - /health
@@ -236,12 +240,41 @@ public class UserController {
         if (logger != null) {
             // 添加自定义上下文信息
             logger.setHandlerMethod("createUser");
+            // 配置 URL 规范化占位符（降低监控标签基数）
+            logger.getContext().setUrlPlaceholders(new String[]{"{userId}"});
         }
         
         return userService.create(dto);
     }
 }
 ```
+
+### URL 规范化（降低监控标签基数）
+
+URL 规范化功能可以将路径中的数字 ID 替换为占位符，降低监控系统中的标签基数：
+
+```java
+// 在 HttpLogCustomizer 中配置
+@Component
+public class MyHttpLogCustomizer implements HttpLogCustomizer {
+    @Override
+    public void customize(HttpRequestLogger logger, HttpServletRequest request) {
+        // 根据路径配置不同的占位符
+        String uri = request.getRequestURI();
+        if (uri.startsWith("/api/info/")) {
+            // URL: /api/info/2434420/1459635/seats
+            // 规范化后: /api/info/{showId}/{ticketId}/seats
+            logger.getContext().setUrlPlaceholders(new String[]{"{showId}", "{ticketId}"});
+        } else if (uri.startsWith("/api/users/")) {
+            // URL: /api/users/123
+            // 规范化后: /api/users/{userId}
+            logger.getContext().setUrlPlaceholders(new String[]{"{userId}"});
+        }
+    }
+}
+```
+
+规范化后的 URL 会出现在日志的 `normalized_url` 字段中（JSON 格式），或在文本格式中显示为 "Normalized URL" 行。
 
 ---
 

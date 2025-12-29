@@ -60,6 +60,10 @@ JsonHttpLogFormatter prettyFormatter = new JsonHttpLogFormatter(true);
 formatter.redactHeaders(Set.of("Authorization"))
          .redactQueryParams(Set.of("token"));
 
+// 包含完整事件序列（用于分析调用链路）
+JsonHttpLogFormatter formatterWithEvents = new JsonHttpLogFormatter()
+    .setIncludeEvents(true);  // 开启后会在 timing.events 中记录所有事件的详细信息
+
 // 设置为全局默认
 HttpRequestLogger.setDefaultFormatter(formatter);
 ```
@@ -305,13 +309,14 @@ mc:
       enabled: true
       
       # 格式化配置
-      format: text                      # text 或 json
+      format: json                      # json 或 text（默认 json）
+      include-events: false             # 是否包含完整事件序列（仅 JSON 格式有效）
       
       # 内容配置
       include-request-body: true
       include-response-body: true
       include-headers: true
-      max-payload-length: 10240         # 最大记录长度（字节）
+      max-payload-length: -1            # 最大记录长度（字节，-1 表示无限制）
       
       # 排除配置
       exclude-patterns:
@@ -330,10 +335,6 @@ mc:
         - token
         - password
         - secret
-      
-      # 输出配置
-      output: slf4j                     # slf4j 或 console
-      log-level: INFO                   # TRACE, DEBUG, INFO, WARN, ERROR
 ```
 
 ### 手动配置 Filter
@@ -380,3 +381,25 @@ public class HttpLoggingConfig {
     }
 }
 ```
+
+### URL 规范化配置
+
+URL 规范化功能可以将路径中的数字 ID 替换为占位符，降低监控系统中的标签基数：
+
+```java
+@Component
+public class MyHttpLogCustomizer implements HttpLogCustomizer {
+    @Override
+    public void customize(HttpRequestLogger logger, HttpServletRequest request) {
+        // 根据路径配置不同的占位符
+        String uri = request.getRequestURI();
+        if (uri.startsWith("/api/info/")) {
+            // URL: /api/info/2434420/1459635/seats
+            // 规范化后: /api/info/{showId}/{ticketId}/seats
+            logger.getContext().setUrlPlaceholders(new String[]{"{showId}", "{ticketId}"});
+        }
+    }
+}
+```
+
+规范化后的 URL 会出现在日志的 `normalized_url` 字段中（JSON 格式），或在文本格式中显示为 "Normalized URL" 行。如果规范化后的 URL 与原始 URL 一致，则不会显示 `normalized_url` 字段，避免冗余。

@@ -15,6 +15,7 @@
 - ⏱️ **详细耗时** - DNS、连接、TTFB、下载...每个阶段耗时一目了然
 - 📊 **多种格式** - 文本格式便于调试，JSON 格式便于分析
 - 🛡️ **脱敏支持** - Authorization、Cookie 等敏感头自动脱敏
+- 🔗 **URL 规范化** - 自动将路径中的数字 ID 替换为占位符，降低监控系统标签基数
 - 🎯 **零侵入** - 不改业务代码，Filter/EventListener 即插即用
 - 🔧 **可扩展** - 格式化器、输出目标、适配器全部可定制
 
@@ -187,7 +188,7 @@ Content-Type: application/json
 | 输出目标 | `Slf4jLogOutput`       | 输出到 SLF4J（INFO 级别） |
 | 请求体/响应体最大长度 | `无限制` | 默认不限制，可通过配置设置限制（超过限制会被截断） |
 
-**⚠️ 重要提示：** 请求体和响应体的最大记录长度默认**无限制**（`-1`）。如果设置了限制值，超过此长度的内容会被截断，并在日志中显示 `... [truncated N bytes]` 提示。建议根据实际日志系统的限制（如单条日志限制为 512KB 的系统）来设置合适的限制值。可通过配置修改 `maxPayloadLength`、`maxRequestBodyLength` 或 `maxResponseBodyLength`。
+**⚠️ 提示：** 请求体和响应体的最大记录长度默认**无限制**（`-1`）。如果设置了限制值，超过此长度的内容会被截断，并在日志中显示 `... [truncated N bytes]` 提示。建议根据实际日志系统的限制来设置合适的限制值。
 
 **切换格式化器：**
 
@@ -222,22 +223,44 @@ HttpRequestLogger.setDefaultOutput(CompositeLogOutput.of(
 
 **配置请求体/响应体最大长度：**
 
-```java
-// 服务端：通过 HttpLoggingFilter 配置
-HttpLoggingFilter filter = new HttpLoggingFilter();
-filter.setMaxPayloadLength(512 * 1024); // 设置为 512KB
-
-// 格式化器：通过 AbstractHttpLogFormatter 配置
-JsonHttpLogFormatter formatter = new JsonHttpLogFormatter();
-formatter.setMaxRequestBodyLength(512 * 1024);  // 请求体最大长度
-formatter.setMaxResponseBodyLength(512 * 1024); // 响应体最大长度
-
-// Spring Boot 自动配置（application.yml）
+```yaml
+# Spring Boot 自动配置（application.yml）
 mc:
   http:
     logging:
       max-payload-length: 512000  # 512KB（单位：字节，-1 表示无限制）
 ```
+
+```java
+// 代码配置
+HttpLoggingFilter filter = new HttpLoggingFilter();
+filter.setMaxPayloadLength(512 * 1024); // 512KB
+```
+
+**URL 规范化（降低监控标签基数）：**
+
+```java
+// 客户端：在 HttpLogContext 中配置占位符
+HttpRequestLogger logger = HttpRequestLogger.forClient(
+    HttpLogContext.builder()
+        .interfaceName("获取场次信息")
+        .urlPlaceholders("{showId}", "{ticketId}")  // 自定义占位符
+        .build()
+);
+
+// 服务端：在 HttpLogCustomizer 中配置
+@Component
+public class MyHttpLogCustomizer implements HttpLogCustomizer {
+    @Override
+    public void customize(HttpRequestLogger logger, HttpServletRequest request) {
+        if (request.getRequestURI().startsWith("/api/info/")) {
+            logger.getContext().setUrlPlaceholders(new String[]{"{showId}", "{ticketId}"});
+        }
+    }
+}
+```
+
+URL `/api/info/2434420/1459635/seats` 会被规范化为 `/api/info/{showId}/{ticketId}/seats`，便于在监控系统中聚合统计。
 
 ## 📚 文档
 
