@@ -62,6 +62,23 @@ public class HttpLogContext {
     private Map<String, Object> extras = new HashMap<>();
 
     /**
+     * URL 规范化占位符配置
+     * 用于自定义 URL 路径中数字 ID 的占位符名称，优化日志输出和监控系统中的标签可读性
+     * <p>
+     * 示例：
+     * <ul>
+     *   <li>URL: /api/info/2434420/1459635/seats</li>
+     *   <li>占位符: ["{showId}", "{ticketId}"]</li>
+     *   <li>规范化后: /api/info/{showId}/{ticketId}/seats</li>
+     * </ul>
+     * <p>
+     * 如果占位符数量少于 URL 中的数字数量，超出部分将使用默认的 {id}
+     * 如果占位符数量多于数字数量，多余的占位符会被忽略
+     */
+    @Nullable
+    private String[] urlPlaceholders;
+
+    /**
      * 设置标签
      */
     public HttpLogContext setTags(String tag1, String tag2) {

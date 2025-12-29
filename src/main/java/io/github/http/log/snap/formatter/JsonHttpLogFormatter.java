@@ -8,6 +8,8 @@ import io.github.http.log.snap.HttpTiming;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.annotation.Nullable;
+
 import java.util.LinkedHashMap;
 
 /**
@@ -76,7 +78,7 @@ public class JsonHttpLogFormatter extends AbstractHttpLogFormatter {
         }
 
         // 请求信息
-        json.put("request", buildRequestJson(data.getRequest()));
+        json.put("request", buildRequestJson(data.getRequest(), data.getContext()));
 
         // 响应信息
         if (data.getResponse() != null) {
@@ -149,11 +151,17 @@ public class JsonHttpLogFormatter extends AbstractHttpLogFormatter {
         return json;
     }
 
-    private JSONObject buildRequestJson(HttpLogData.Request request) {
+    private JSONObject buildRequestJson(HttpLogData.Request request, @Nullable HttpLogContext context) {
         JSONObject json = new JSONObject(new LinkedHashMap<>());
 
         json.put("method", request.getMethod());
+        // 原始 URL（经过脱敏处理）
         json.put("url", redactUrl(request.getUrl()));
+        // 规范化后的 URL（根据上下文配置决定使用自定义占位符或默认 {id}）
+        String normalizedUrl = request.getNormalizedUrl(context);
+        if (normalizedUrl != null) {
+            json.put("normalized_url", normalizedUrl);
+        }
         if (request.getProtocol() != null) {
             json.put("protocol", request.getProtocol());
         }

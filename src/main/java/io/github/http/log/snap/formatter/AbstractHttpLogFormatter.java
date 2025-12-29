@@ -1,9 +1,11 @@
 package io.github.http.log.snap.formatter;
 
+import io.github.http.log.snap.HttpLogContext;
 import io.github.http.log.snap.HttpLogData;
 import lombok.Getter;
 import lombok.NonNull;
 
+import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -201,6 +203,27 @@ public abstract class AbstractHttpLogFormatter implements HttpLogFormatter {
     }
 
     /**
+     * 获取格式化后的 URL（根据上下文配置决定使用规范化 URL 或脱敏后的原始 URL）
+     * <p>
+     * 如果上下文中配置了自定义占位符，则使用规范化 URL；否则使用脱敏后的原始 URL
+     *
+     * @param request HTTP 请求对象
+     * @param context HTTP 日志上下文（可能包含占位符配置）
+     * @return 格式化后的 URL
+     */
+    protected String getFormattedUrl(@NonNull HttpLogData.Request request, @Nullable HttpLogContext context) {
+        if (context != null) {
+            String[] placeholders = context.getUrlPlaceholders();
+            if (placeholders != null && placeholders.length > 0) {
+                // 使用规范化 URL（已包含占位符替换）
+                return request.getNormalizedUrl(context);
+            }
+        }
+        // 使用原始 URL（经过脱敏处理）
+        return redactUrl(request.getUrl());
+    }
+
+    /**
      * 对 URL 中的查询参数进行脱敏
      *
      * @param url 原始 URL
@@ -267,7 +290,7 @@ public abstract class AbstractHttpLogFormatter implements HttpLogFormatter {
      * 截断字符串
      */
     protected String truncate(String str, int maxLength) {
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return str;
         }
         // maxLength <= 0 表示无限制

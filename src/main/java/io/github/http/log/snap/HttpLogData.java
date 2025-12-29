@@ -115,6 +115,72 @@ public class HttpLogData {
     }
 
     /**
+     * 获取规范化后的请求 URL，自动使用当前数据的上下文配置
+     * <p>
+     * 该方法会自动从 {@link #context} 中读取占位符配置，将 URL 路径中的数字 ID 替换为占位符，
+     * 用于降低监控系统中的标签基数，提升查询性能和存储效率。
+     * <p>
+     * <strong>行为说明：</strong>
+     * <ul>
+     *   <li>如果上下文中配置了自定义占位符，则按顺序使用自定义占位符替换路径中的数字 ID</li>
+     *   <li>如果占位符数量少于数字数量，超出部分使用默认的 {@code {id}} 占位符</li>
+     *   <li>如果占位符数量多于数字数量，多余的占位符会被忽略</li>
+     *   <li>如果未配置占位符或 context 为 null，所有数字 ID 将替换为默认的 {@code {id}} 占位符</li>
+     * </ul>
+     * <p>
+     * <strong>使用示例：</strong>
+     * <pre>{@code
+     * // 示例 1：使用默认占位符
+     * HttpLogData data = ...; // 假设 URL 为 "https://api.example.com/users/123/orders/456"
+     * String normalized = data.getNormalizedRequestUrl();
+     * // 结果: "https://api.example.com/users/{id}/orders/{id}"
+     *
+     * // 示例 2：使用自定义占位符
+     * HttpLogContext context = HttpLogContext.builder()
+     *     .urlPlaceholders("{showId}", "{ticketId}")
+     *     .build();
+     * HttpLogData data = HttpLogData.builder()
+     *     .context(context)
+     *     .request(request) // 假设 URL 为 "https://showopen.maoyan.com/myshow/open/api/info/2434420/1459635/seats"
+     *     .build();
+     * String normalized = data.getNormalizedRequestUrl();
+     * // 结果: "https://showopen.maoyan.com/myshow/open/api/info/{showId}/{ticketId}/seats"
+     *
+     * // 示例 3：占位符少于数字数量
+     * HttpLogContext context = HttpLogContext.builder()
+     *     .urlPlaceholders("{showId}")
+     *     .build();
+     * HttpLogData data = HttpLogData.builder()
+     *     .context(context)
+     *     .request(request) // 假设 URL 为 "https://api.example.com/info/123/456/789"
+     *     .build();
+     * String normalized = data.getNormalizedRequestUrl();
+     * // 结果: "https://api.example.com/info/{showId}/{id}/{id}"
+     *
+     * // 示例 4：在监控上报中使用
+     * Map<String, Object> tags = new HashMap<>();
+     * tags.put("request_url", data.getNormalizedRequestUrl());
+     * TrendClient.log("http.client.latency", data.getTotalTimeMs(), tags);
+     * }</pre>
+     * <p>
+     * <strong>注意事项：</strong>
+     * <ul>
+     *   <li>该方法只规范化路径部分，保留协议、主机、端口等信息</li>
+     *   <li>URL 的 query 参数部分会被移除（使用 urlWithoutQuery）</li>
+     *   <li>如果原始 URL 为 null 或空，返回 null</li>
+     * </ul>
+     *
+     * @return 规范化后的 URL，如果 urlWithoutQuery 为 null 则返回 null
+     * @see #context
+     * @see HttpLogContext#getUrlPlaceholders()
+     * @see Request#getNormalizedUrl(HttpLogContext)
+     */
+    @Nullable
+    public String getNormalizedRequestUrl() {
+        return request.getNormalizedUrl(this.context);
+    }
+
+    /**
      * 是否请求失败
      */
     public boolean hasFailed() {
@@ -234,6 +300,52 @@ public class HttpLogData {
                 return url;
             }
             return url.substring(0, queryIndex);
+        }
+
+        /**
+         * 获取规范化后的 URL（将路径中的数字 ID 替换为 {id} 占位符）
+         * <p>
+         * 用于降低监控系统中的标签基数，将动态 URL 聚合为路径模式
+         * <p>
+         * 示例：
+         * <ul>
+         *   <li>/api/users/123/orders -> /api/users/{id}/orders</li>
+         *   <li>/api/users/123/orders/456 -> /api/users/{id}/orders/{id}</li>
+         * </ul>
+         *
+         * @return 规范化后的 URL，如果 urlWithoutQuery 为 null 则返回 null
+         */
+        @Nullable
+        public String getNormalizedUrl() {
+            return UrlNormalizer.normalize(this.urlWithoutQuery);
+        }
+
+        /**
+         * 获取规范化后的 URL，使用上下文中的自定义占位符
+         * <p>
+         * 如果上下文中配置了自定义占位符，则使用自定义占位符；否则使用默认的 {id}
+         * <p>
+         * 示例：
+         * <ul>
+         *   <li>URL: /api/info/2434420/1459635/seats</li>
+         *   <li>占位符: ["{showId}", "{ticketId}"]</li>
+         *   <li>结果: /api/info/{showId}/{ticketId}/seats</li>
+         * </ul>
+         *
+         * @param context HTTP 日志上下文，可能包含自定义占位符配置
+         * @return 规范化后的 URL，如果 urlWithoutQuery 为 null 则返回 null
+         */
+        @Nullable
+        public String getNormalizedUrl(@Nullable HttpLogContext context) {
+            if (context != null) {
+                String[] placeholders = context.getUrlPlaceholders();
+                if (placeholders != null && placeholders.length > 0) {
+                    // 使用自定义占位符
+                    return UrlNormalizer.normalize(this.urlWithoutQuery, placeholders);
+                }
+            }
+            // 使用默认的 {id} 占位符
+            return getNormalizedUrl();
         }
     }
 

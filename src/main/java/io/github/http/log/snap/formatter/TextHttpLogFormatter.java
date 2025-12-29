@@ -231,17 +231,24 @@ public class TextHttpLogFormatter implements HttpLogFormatter {
                 ? getEventTime(timing, HttpEvent.REQUEST_RECEIVED, HttpEvent.START)
                 : getEventTime(timing, HttpEvent.REQUEST_HEADERS_START, HttpEvent.CONNECT_FAILED);
 
-        // 对 URL 进行脱敏处理
-        String displayUrl = redactUrl(request.getUrl());
+        // 原始 URL（经过脱敏处理）
+        String originalUrl = redactUrl(request.getUrl());
+        // 规范化后的 URL（根据上下文配置决定使用自定义占位符或默认 {id}）
+        String normalizedUrl = request.getNormalizedUrl(data.getContext());
 
         logs.line().append(startTime).space()
                 .appendLine("--> REQUEST START --------------------------------------------------->")
-                .append("%s %s", request.getMethod(), displayUrl);
+                .append("%s %s", request.getMethod(), originalUrl);
 
         if (isNotBlank(request.getProtocol())) {
             logs.append(" %s", request.getProtocol());
         }
         logs.line();
+        
+        // 如果规范化 URL 与原始 URL 不同，则显示规范化 URL
+        if (normalizedUrl != null && !normalizedUrl.equals(originalUrl)) {
+            logs.appendLine("Normalized URL: %s", normalizedUrl);
+        }
 
         // 请求头
         appendRequestHeaders(logs, request);
