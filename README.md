@@ -1,5 +1,10 @@
 # HTTP Log Snap 📸
 
+![Maven Central](https://img.shields.io/maven-central/v/io.github.null-object-0000/http-log-snap?label=Maven%20Central&logo=apachemaven&link=https://central.sonatype.com/artifact/io.github.null-object-0000/http-log-snap)
+![Java](https://img.shields.io/badge/Java-21-orange?logo=openjdk)
+![License](https://img.shields.io/badge/License-MIT-green.svg)
+![GitHub stars](https://img.shields.io/github/stars/null-object-0000/http-log-snap?style=social)
+
 一个轻量级的 Java HTTP 请求/响应日志记录库，**快照式**捕获完整的 HTTP 交互。
 
 同时支持 **客户端**（OkHttp）和 **服务端**（Spring MVC）场景。
