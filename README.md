@@ -5,7 +5,7 @@
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 ![GitHub stars](https://img.shields.io/github/stars/null-object-0000/http-log-snap?style=social)
 
-> **📌 版本说明：** 这是 **JDK 8** 版本。如果你的项目使用 **JDK 21**，请使用 [http-log-snap-jdk21](../http-log-snap-jdk21) 版本。
+> **📌 版本说明：** 这是 **JDK 8** 版本（[support-jdk8 分支](https://github.com/null-object-0000/http-log-snap/tree/support-jdk8)）。如果你的项目使用 **JDK 21**，请使用 [主仓库版本](https://github.com/null-object-0000/http-log-snap)。
 
 一个轻量级的 Java HTTP 请求/响应日志记录库，**快照式**捕获完整的 HTTP 交互。
 
@@ -33,7 +33,7 @@
 </dependency>
 ```
 
-> **💡 提示：** 如果你的项目使用 JDK 21，请使用 `http-log-snap-jdk21` 依赖。
+> **💡 提示：** 如果你的项目使用 JDK 21，请使用 `http-log-snap` 依赖（[主仓库](https://github.com/null-object-0000/http-log-snap)）。
 
 ## 🚀 30 秒上手
 
