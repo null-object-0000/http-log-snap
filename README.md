@@ -44,7 +44,7 @@
 ```
 
 > **💡 提示：** 
-> - 如果你的项目使用 **JDK 21**，请使用 `http-log-snap` 依赖（当前仓库）
+> - 如果你的项目使用 **JDK 21**，请使用 `http-log-snap` 依赖（[主仓库版本](https://github.com/null-object-0000/http-log-snap)）
 > - 如果你的项目使用 **JDK 8**，请使用 `http-log-snap-jdk8` 依赖（[support-jdk8 分支](https://github.com/null-object-0000/http-log-snap/tree/support-jdk8)）
 
 ## 🚀 30 秒上手
