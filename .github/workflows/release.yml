@@ -3,40 +3,125 @@ name: Release to Maven Central
 on:
   release:
     types: [created]
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version to release (e.g., 0.0.11)'
-        required: true
-        type: string
 
 jobs:
   publish:
+    strategy:
+      matrix:
+        include:
+          - jdk-version: '8'
+            project-dir: 'http-log-snap-jdk1.8'
+            artifact-id: 'http-log-snap-jdk8'
+            tag-suffix: '-jdk8'
+          - jdk-version: '21'
+            project-dir: 'http-log-snap-jdk21'
+            artifact-id: 'http-log-snap'
+            tag-suffix: ''
     runs-on: ubuntu-latest
     permissions:
       contents: read
     
     steps:
-      - name: Checkout code
+      - name: Checkout code (initial)
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ github.event.release.tag_name || github.ref }}
+
+      - name: Determine checkout ref
+        id: checkout-ref
+        run: |
+          # Release 事件：从 release tag 生成对应的 tag
+          RELEASE_TAG="${{ github.event.release.tag_name }}"
+          
+          if [ "${{ matrix.jdk-version }}" = "8" ]; then
+            # JDK 8: release tag + -jdk8 后缀
+            # 例如: 0.0.11 -> 0.0.11-jdk8
+            JDK8_TAG="${RELEASE_TAG}-jdk8"
+            echo "Checking if tag ${JDK8_TAG} exists..."
+            if git ls-remote --tags origin | grep -q "refs/tags/${JDK8_TAG}"; then
+              echo "ref=${JDK8_TAG}" >> $GITHUB_OUTPUT
+              echo "✓ Found tag: ${JDK8_TAG}"
+            else
+              echo "✗ ERROR: Required tag ${JDK8_TAG} not found!"
+              echo "Please create tag ${JDK8_TAG} before releasing."
+              exit 1
+            fi
+          else
+            # JDK 21: 直接使用 release tag
+            # 例如: 0.0.11 -> 0.0.11
+            echo "ref=${RELEASE_TAG}" >> $GITHUB_OUTPUT
+            echo "✓ Using tag: ${RELEASE_TAG}"
+          fi
+          
+          # 保存 release tag 供后续步骤使用
+          echo "release_tag=${RELEASE_TAG}" >> $GITHUB_OUTPUT
+
+      - name: Checkout code (target ref)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ steps.checkout-ref.outputs.ref }}
+
+      - name: Verify code consistency (JDK 8 only)
+        if: matrix.jdk-version == '8'
+        run: |
+          RELEASE_TAG="${{ steps.checkout-ref.outputs.release_tag }}"
+          JDK8_TAG="${{ steps.checkout-ref.outputs.ref }}"
+          
+          echo "Verifying that ${JDK8_TAG} is based on ${RELEASE_TAG}..."
+          
+          # 获取两个 tag 的 commit hash
+          RELEASE_COMMIT=$(git rev-parse ${RELEASE_TAG} 2>/dev/null)
+          JDK8_COMMIT=$(git rev-parse ${JDK8_TAG} 2>/dev/null)
+          
+          if [ -z "$RELEASE_COMMIT" ]; then
+            echo "✗ ERROR: Tag ${RELEASE_TAG} not found in repository!"
+            exit 1
+          fi
+          
+          if [ -z "$JDK8_COMMIT" ]; then
+            echo "✗ ERROR: Tag ${JDK8_TAG} not found in repository!"
+            exit 1
+          fi
+          
+          echo "Release tag ${RELEASE_TAG} points to: ${RELEASE_COMMIT}"
+          echo "JDK 8 tag ${JDK8_TAG} points to: ${JDK8_COMMIT}"
+          
+          # 检查 JDK 8 tag 是否包含 release tag 的所有 commit
+          # 使用 git merge-base 来检查
+          MERGE_BASE=$(git merge-base ${RELEASE_TAG} ${JDK8_TAG} 2>/dev/null)
+          
+          if [ -z "$MERGE_BASE" ]; then
+            echo "✗ ERROR: Tags ${RELEASE_TAG} and ${JDK8_TAG} have no common ancestor!"
+            exit 1
+          fi
+          
+          echo "Common ancestor: ${MERGE_BASE}"
+          
+          # 检查 release tag 的 commit 是否是 JDK 8 tag 的祖先（或相同）
+          if git merge-base --is-ancestor ${RELEASE_TAG} ${JDK8_TAG} 2>/dev/null; then
+            echo "✓ Verified: ${JDK8_TAG} is based on ${RELEASE_TAG}"
+          else
+            echo "✗ ERROR: ${JDK8_TAG} is NOT based on ${RELEASE_TAG}!"
+            echo "The JDK 8 version must include all commits from the JDK 21 version."
+            echo "Please ensure ${JDK8_TAG} is created from a commit that includes ${RELEASE_TAG}."
+            exit 1
+          fi
 
       - name: Display version information
         run: |
-          if [ "${{ github.event_name }}" = "release" ]; then
-            echo "Release tag: ${{ github.event.release.tag_name }}"
-            echo "Release name: ${{ github.event.release.name }}"
-            echo "Release body: ${{ github.event.release.body }}"
-          else
-            echo "Manual trigger - Version: ${{ github.event.inputs.version }}"
-          fi
+          echo "Release tag: ${{ github.event.release.tag_name }}"
+          echo "Release name: ${{ github.event.release.name }}"
+          echo "Release body: ${{ github.event.release.body }}"
+          echo "Building JDK ${{ matrix.jdk-version }} version in ${{ matrix.project-dir }}"
+          echo "Artifact ID: ${{ matrix.artifact-id }}"
+          echo "Checkout ref: ${{ steps.checkout-ref.outputs.ref }}"
+          echo "Current branch/tag: $(git rev-parse --abbrev-ref HEAD 2>/dev/null || git describe --tags --exact-match HEAD 2>/dev/null || echo 'detached')"
 
-      - name: Set up JDK 21
+      - name: Set up JDK ${{ matrix.jdk-version }}
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
+          java-version: ${{ matrix.jdk-version }}
           distribution: 'temurin'
           server-id: central
           server-username: ${{ secrets.CENTRAL_USERNAME }}
@@ -92,10 +177,13 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
+          key: ${{ runner.os }}-m2-${{ matrix.project-dir }}-${{ hashFiles(format('{0}/pom.xml', matrix.project-dir)) }}
+          restore-keys: |
+            ${{ runner.os }}-m2-${{ matrix.project-dir }}-
+            ${{ runner.os }}-m2-
 
       - name: Build and publish to Maven Central
+        working-directory: ${{ matrix.project-dir }}
         env:
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: |
@@ -105,4 +193,3 @@ jobs:
             -Dgpg.useagent=false \
             -DaltSnapshotDeploymentRepository=central::default::https://s01.oss.sonatype.org/content/repositories/snapshots \
             -DaltReleaseDeploymentRepository=central::default::https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/
-
