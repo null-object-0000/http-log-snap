@@ -285,6 +285,7 @@ URL `/api/info/2434420/1459635/seats` 会被规范化为 `/api/info/{showId}/{ti
 - [📖 使用指南](docs/guide.md) - 完整的使用教程
 - [🔧 高级用法](docs/advanced.md) - 自定义格式化器、输出目标、适配器
 - [📋 版本记录](CHANGELOG.md) - 查看所有版本的更新内容
+- [🔄 开发与发布流程](docs/workflow.md) - 开发规范、约束和发布流程
 - 💡 接入示例 - 在 IDE 中直接运行：
   - OkHttp 客户端: `src/test/java/.../demo/OkHttpClientDemo.java`
   - Spring Boot 服务端: `src/test/java/.../demo/SpringBootServerDemo.java`
