@@ -133,7 +133,43 @@ git commit -m "chore: bump version to 0.0.11"
 git push origin main
 ```
 
-### 发布步骤
+### 自动化发布脚本
+
+我们提供了一个自动化发布脚本，可以自动完成大部分发布流程：
+
+#### 使用脚本（推荐）
+
+**Linux/macOS/Git Bash:**
+```bash
+# 在 JDK 21 项目（main 分支）
+./scripts/release.sh
+
+# 在 JDK 8 项目（support-jdk8 分支）
+./scripts/release.sh
+```
+
+**Windows PowerShell:**
+```powershell
+# 在 JDK 21 项目（main 分支）
+.\scripts\release.ps1
+
+# 在 JDK 8 项目（support-jdk8 分支）
+.\scripts\release.ps1
+```
+
+脚本会自动：
+1. ✅ 读取 `pom.xml` 获取版本号
+2. ✅ 检查 `CHANGELOG.md` 是否包含当前版本说明
+3. ✅ 检查是否有未提交的更改，如有则提示
+4. ✅ 检查是否有未推送的提交，如有则提示推送
+5. ✅ 检查 tag 是否已存在，如存在则询问是否删除
+6. ✅ 根据当前分支自动判断是 JDK 21 还是 JDK 8
+7. ✅ 在正确的分支创建相应的 tag
+8. ✅ 询问是否推送 tag 到远程仓库
+
+### 手动发布步骤
+
+如果不使用脚本，可以按照以下步骤手动发布：
 
 #### 步骤 1: 创建 JDK 21 版本的 Tag
 
