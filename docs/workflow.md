@@ -4,20 +4,20 @@
 
 ## 🎯 核心原则
 
-### 1. 主开发分支：JDK 21 项目（master 分支）
+### 1. 主开发分支：JDK 21 项目（main 分支）
 
 **所有新功能开发和代码迭代都必须在 JDK 21 项目中进行。**
 
-- ✅ 在 `master` 分支（JDK 21 项目）中开发新功能
-- ✅ 在 `master` 分支中修复 bug
-- ✅ 在 `master` 分支中重构代码
-- ✅ 在 `master` 分支中更新文档
+- ✅ 在 `main` 分支（JDK 21 项目）中开发新功能
+- ✅ 在 `main` 分支中修复 bug
+- ✅ 在 `main` 分支中重构代码
+- ✅ 在 `main` 分支中更新文档
 
 ### 2. JDK 1.8 项目：仅同步代码
 
 **JDK 1.8 项目（support-jdk8 分支）只通过拉取主分支代码进行迭代。**
 
-- ✅ 通过 `git merge master` 从主分支同步代码
+- ✅ 通过 `git merge main` 从主分支同步代码
 - ✅ 应用 JDK 1.8 兼容性修复
 - ❌ **禁止**在 support-jdk8 分支中直接开发新功能
 - ❌ **禁止**在 support-jdk8 分支中直接修复 bug（除非是 JDK 1.8 特有的问题）
@@ -28,8 +28,8 @@
 
 ```bash
 # 切换到主分支
-git checkout master
-git pull origin master
+git checkout main
+git pull origin main
 
 # 创建功能分支
 git checkout -b feature/new-feature
@@ -42,8 +42,8 @@ git push origin feature/new-feature
 
 ### 2. 代码审查和合并
 
-- 创建 Pull Request 到 `master` 分支
-- 代码审查通过后合并到 `master`
+- 创建 Pull Request 到 `main` 分支
+- 代码审查通过后合并到 `main`
 
 ### 3. 同步到 JDK 1.8 分支
 
@@ -53,7 +53,7 @@ git checkout support-jdk8
 git pull origin support-jdk8
 
 # 合并主分支的代码
-git merge master
+git merge main
 
 # 解决可能的冲突
 # 应用 JDK 1.8 兼容性修复（如果需要）
@@ -86,11 +86,11 @@ git push origin support-jdk8
 
 ### ✅ 允许的操作
 
-- 在 `master` 分支中开发所有新功能
-- 在 `master` 分支中修复所有 bug
-- 在 `master` 分支中重构代码
-- 在 `master` 分支中更新文档
-- 在 `support-jdk8` 分支中合并 `master` 分支的代码
+- 在 `main` 分支中开发所有新功能
+- 在 `main` 分支中修复所有 bug
+- 在 `main` 分支中重构代码
+- 在 `main` 分支中更新文档
+- 在 `support-jdk8` 分支中合并 `main` 分支的代码
 - 在 `support-jdk8` 分支中应用 JDK 1.8 兼容性修复
 - 在 `support-jdk8` 分支中修复 JDK 1.8 特有的问题
 
@@ -104,7 +104,7 @@ git push origin support-jdk8
 
 ## 📝 代码同步检查清单
 
-在将代码从 `master` 同步到 `support-jdk8` 后，请检查：
+在将代码从 `main` 同步到 `support-jdk8` 后，请检查：
 
 - [ ] 代码已成功合并，无冲突
 - [ ] 所有 JDK 1.8 不兼容的 API 已修复
@@ -130,7 +130,7 @@ git push origin support-jdk8
 ```bash
 git add .
 git commit -m "chore: bump version to 0.0.11"
-git push origin master
+git push origin main
 ```
 
 ### 发布步骤
@@ -141,8 +141,8 @@ git push origin master
 
 ```bash
 # 切换到主分支
-git checkout master
-git pull origin master
+git checkout main
+git pull origin main
 
 # 创建 tag（不带 v 前缀）
 git tag 0.0.11
@@ -159,7 +159,7 @@ git checkout support-jdk8
 git pull origin support-jdk8
 
 # 合并主分支的代码
-git merge master
+git merge main
 
 # 解决可能的冲突（如果有）
 # 确保所有 JDK 1.8 兼容性修复已应用
