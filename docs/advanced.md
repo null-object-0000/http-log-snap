@@ -303,7 +303,7 @@ HttpLogOutput output = HttpLoggingRegistry.getOutput("kafka");
 ### 完整配置示例
 
 ```yaml
-mc:
+newbie:
   http:
     logging:
       enabled: true

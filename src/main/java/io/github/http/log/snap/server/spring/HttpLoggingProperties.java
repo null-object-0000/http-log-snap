@@ -12,7 +12,7 @@ import java.util.Set;
  * @author http-logging
  */
 @Data
-@ConfigurationProperties(prefix = "mc.http.logging")
+@ConfigurationProperties(prefix = "newbie.http.logging")
 public class HttpLoggingProperties {
 
     /**

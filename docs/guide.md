@@ -171,7 +171,7 @@ logger.log();
 在 `application.yml` 中启用：
 
 ```yaml
-mc:
+newbie:
   http:
     logging:
       enabled: true

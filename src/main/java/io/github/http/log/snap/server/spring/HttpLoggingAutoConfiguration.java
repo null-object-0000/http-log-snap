@@ -21,21 +21,21 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * <p>
  * 通过配置属性控制日志记录行为：
  * <pre>
- * mc.http.logging.enabled=true                    # 是否启用
- * mc.http.logging.include-request-body=true       # 是否记录请求体
- * mc.http.logging.include-response-body=true      # 是否记录响应体
- * mc.http.logging.include-headers=true            # 是否记录请求头
- * mc.http.logging.max-payload-length=10240        # 最大记录长度
- * mc.http.logging.format=json                     # 日志格式：json/text
- * mc.http.logging.include-events=true             # 是否包含事件序列（仅 JSON 格式有效）
- * mc.http.logging.exclude-patterns=/health,/actuator/**  # 排除的 URL
+ * newbie.http.logging.enabled=true                    # 是否启用
+ * newbie.http.logging.include-request-body=true       # 是否记录请求体
+ * newbie.http.logging.include-response-body=true      # 是否记录响应体
+ * newbie.http.logging.include-headers=true            # 是否记录请求头
+ * newbie.http.logging.max-payload-length=10240        # 最大记录长度
+ * newbie.http.logging.format=json                     # 日志格式：json/text
+ * newbie.http.logging.include-events=true             # 是否包含事件序列（仅 JSON 格式有效）
+ * newbie.http.logging.exclude-patterns=/health,/actuator/**  # 排除的 URL
  * </pre>
  *
  * @author http-logging
  */
 @Configuration
 @ConditionalOnClass({Filter.class})
-@ConditionalOnProperty(prefix = "mc.http.logging", name = "enabled", havingValue = "true", matchIfMissing = false)
+@ConditionalOnProperty(prefix = "newbie.http.logging", name = "enabled", havingValue = "true", matchIfMissing = false)
 @EnableConfigurationProperties(HttpLoggingProperties.class)
 public class HttpLoggingAutoConfiguration {
 

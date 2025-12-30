@@ -81,7 +81,7 @@ logger.log();
 
 ```yaml
 # application.yml
-mc:
+newbie:
   http:
     logging:
       enabled: true
@@ -243,7 +243,7 @@ HttpRequestLogger.setDefaultOutput(CompositeLogOutput.of(
 
 ```yaml
 # Spring Boot 自动配置（application.yml）
-mc:
+newbie:
   http:
     logging:
       max-payload-length: 512000  # 512KB（单位：字节，-1 表示无限制）
