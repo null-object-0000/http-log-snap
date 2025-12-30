@@ -117,6 +117,18 @@ jobs:
           echo "Artifact ID: ${{ matrix.artifact-id }}"
           echo "Checkout ref: ${{ steps.checkout-ref.outputs.ref }}"
           echo "Current branch/tag: $(git rev-parse --abbrev-ref HEAD 2>/dev/null || git describe --tags --exact-match HEAD 2>/dev/null || echo 'detached')"
+          echo "Current working directory: $(pwd)"
+          echo "Listing directory contents:"
+          ls -la
+          echo "Checking if ${{ matrix.project-dir }} exists:"
+          if [ -d "${{ matrix.project-dir }}" ]; then
+            echo "✓ Directory ${{ matrix.project-dir }} exists"
+            ls -la "${{ matrix.project-dir }}"
+          else
+            echo "✗ Directory ${{ matrix.project-dir }} does not exist"
+            echo "Available directories:"
+            find . -maxdepth 1 -type d | head -20
+          fi
 
       - name: Set up JDK ${{ matrix.jdk-version }}
         uses: actions/setup-java@v4
@@ -177,16 +189,27 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ matrix.project-dir }}-${{ hashFiles(format('{0}/pom.xml', matrix.project-dir)) }}
+          key: ${{ runner.os }}-m2-${{ matrix.artifact-id }}-${{ hashFiles(format('{0}/pom.xml', matrix.project-dir)) }}
           restore-keys: |
-            ${{ runner.os }}-m2-${{ matrix.project-dir }}-
+            ${{ runner.os }}-m2-${{ matrix.artifact-id }}-
             ${{ runner.os }}-m2-
 
       - name: Build and publish to Maven Central
-        working-directory: ${{ matrix.project-dir }}
         env:
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: |
+          # 检查项目目录是否存在，如果不存在则使用当前目录（独立仓库情况）
+          if [ -d "${{ matrix.project-dir }}" ]; then
+            BUILD_DIR="${{ matrix.project-dir }}"
+            echo "Using project directory: $BUILD_DIR"
+          else
+            BUILD_DIR="."
+            echo "Project directory ${{ matrix.project-dir }} not found, using current directory (independent repository)"
+          fi
+          
+          # 切换到构建目录并执行构建
+          cd "$BUILD_DIR"
+          echo "Building in directory: $(pwd)"
           mvn clean deploy \
             -DskipTests=false \
             -Dmaven.test.skip=false \
