@@ -29,7 +29,7 @@
 <dependency>
     <groupId>io.github.null-object-0000</groupId>
     <artifactId>http-log-snap</artifactId>
-    <version>0.0.10</version>
+    <version>0.0.11</version>
 </dependency>
 ```
 
@@ -39,7 +39,7 @@
 <dependency>
     <groupId>io.github.null-object-0000</groupId>
     <artifactId>http-log-snap-jdk8</artifactId>
-    <version>0.0.10</version>
+    <version>0.0.11</version>
 </dependency>
 ```
 

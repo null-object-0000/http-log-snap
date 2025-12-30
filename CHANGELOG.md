@@ -5,6 +5,23 @@
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 版本号遵循 [Semantic Versioning](https://semver.org/lang/zh-CN/)。
 
+## [0.0.11] - 2028-12-30
+
+### ✨ 新增功能
+
+- **新增 JDK 1.8 兼容版本**：提供 `http-log-snap-jdk8` 依赖，支持在 JDK 1.8 项目中使用
+  - 所有功能与 JDK 21 版本保持一致
+  - 使用 JDK 1.8 兼容的 API 实现（如 `String.isBlank()` → `str.trim().isEmpty()`）
+  - 支持通过 Maven Central 安装：`io.github.null-object-0000:http-log-snap-jdk8:0.0.11`
+
+### 🔧 改进
+
+- **代码重构**：统一字符串工具方法到 `StringUtils` 工具类，消除重复实现
+  - 新增 `StringUtils.isNotBlank()` 和 `StringUtils.isBlank()` 方法
+  - 所有格式化器和工具类统一使用 `StringUtils` 方法
+
+---
+
 ## [0.0.10] - 2025-12-29
 
 ### 🔧 改进
