@@ -4,6 +4,10 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.Ordered;
 
+import io.github.http.log.snap.server.spring.rule.ExcludeRuleProperties;
+import io.github.http.log.snap.server.spring.rule.SseRuleProperties;
+
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -65,6 +69,17 @@ public class HttpLoggingProperties {
      * 需要排除的 URL 模式（支持 ant 风格）
      */
     private String[] excludePatterns;
+
+    /**
+     * 条件排除规则（支持 URL + body/header 条件判断）
+     */
+    private List<ExcludeRuleProperties> excludeRules;
+
+    /**
+     * SSE 响应规则（支持 URL + body/header 条件判断）
+     * 如果匹配规则，则只记录请求报文，不记录响应报文
+     */
+    private List<SseRuleProperties> sseRules;
 
     /**
      * Filter 顺序（默认最高优先级）

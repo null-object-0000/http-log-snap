@@ -181,9 +181,44 @@ newbie:
       include-headers: true
       include-events: false           # 是否包含完整事件序列（仅 JSON 格式有效）
       max-payload-length: -1           # 最大记录长度（字节，-1 表示无限制）
-      exclude-patterns:               # 排除的 URL
+      exclude-patterns:               # 简单排除：直接排除 URL 模式（支持 ant 风格）
         - /actuator/**
         - /health
+      exclude-rules:                  # 条件排除：URL 匹配 + body/header 条件判断
+        # 示例1：JSON body 表达式过滤（当 stream 字段为 true 时排除）
+        - url-pattern: /api/webhook
+          body-json-expression: "stream == true"
+        
+        # 示例2：body 包含特定字符串时排除
+        - url-pattern: /api/upload
+          body-contains: "skip-log"
+        
+        # 示例3：body 匹配正则表达式时排除
+        - url-pattern: /api/data
+          body-matches: ".*test.*"
+        
+        # 示例4：header 值精确匹配时排除
+        - url-pattern: /api/test
+          header-name: X-Skip-Log
+          header-value: "true"
+        
+        # 示例5：header 值包含特定字符串时排除
+        - url-pattern: /api/bot
+          header-name: User-Agent
+          header-value-contains: "bot"
+        
+        # 示例6：header 值匹配正则表达式时排除
+        - url-pattern: /api/monitor
+          header-name: X-Monitor-Type
+          header-value-matches: ".*health.*"
+        
+        # 示例7：嵌套 JSON 字段比较
+        - url-pattern: /api/order
+          body-json-expression: "order.status == \"completed\""
+        
+        # 示例8：数字比较
+        - url-pattern: /api/stats
+          body-json-expression: "count > 100"
       headers-to-redact:              # 需要脱敏的请求头
         - Authorization
         - Cookie
@@ -248,6 +283,59 @@ public class UserController {
     }
 }
 ```
+
+### 条件排除规则（高级功能）
+
+除了简单的 URL 模式排除（`exclude-patterns`），还支持基于 URL + body/header 条件的灵活排除规则（`exclude-rules`）。
+
+**基本用法：**
+
+```yaml
+newbie:
+  http:
+    logging:
+      exclude-rules:
+        # JSON 表达式过滤：当 stream 字段为 true 时排除
+        - url-pattern: /api/webhook
+          body-json-expression: "stream == true"
+        
+        # Body 字符串匹配：当 body 包含特定字符串时排除
+        - url-pattern: /api/upload
+          body-contains: "skip-log"
+        
+        # Header 条件：当 header 值等于特定值时排除
+        - url-pattern: /api/test
+          header-name: X-Skip-Log
+          header-value: "true"
+```
+
+> 💡 **提示：** 更多条件排除规则的详细配置和使用示例，请查看 [高级用法文档](advanced.md#条件排除规则)
+
+### SSE 响应规则（高级功能）
+
+针对 SSE（Server-Sent Events）流式响应，提供了专门的规则支持（`sse-rules`），可以只记录请求报文，不记录响应体。
+
+**基本用法：**
+
+```yaml
+newbie:
+  http:
+    logging:
+      sse-rules:
+        # URL 模式匹配：匹配 SSE 相关的 URL 路径
+        - url-pattern: /api/events/**
+        
+        # Header 条件匹配：通过 Accept header 匹配 SSE 请求
+        - url-pattern: /**
+          header-name: Accept
+          header-value-contains: "text/event-stream"
+        
+        # JSON 表达式匹配：当请求体中的 stream 字段为 true 时
+        - url-pattern: /api/webhook
+          body-json-expression: "stream == true"
+```
+
+> 💡 **提示：** 更多 SSE 响应规则的详细配置和使用示例，请查看 [高级用法文档](advanced.md#sse-响应规则)
 
 ### URL 规范化（降低监控标签基数）
 
