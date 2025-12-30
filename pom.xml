@@ -6,7 +6,7 @@
 
     <groupId>io.github.null-object-0000</groupId>
     <artifactId>http-log-snap</artifactId>
-    <version>0.0.11</version>
+    <version>0.0.12</version>
     <packaging>jar</packaging>
 
     <name>HTTP Log Snap</name>
@@ -42,6 +42,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
+
+        <!-- GPG 签名配置：本地开发时跳过签名 -->
+        <gpg.skip>true</gpg.skip>
 
         <!-- Dependency Versions -->
         <lombok.version>1.18.42</lombok.version>
@@ -269,6 +272,7 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <skip>${gpg.skip}</skip>
                     <gpgArguments>
                         <arg>--pinentry-mode</arg>
                         <arg>loopback</arg>
