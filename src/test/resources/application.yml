@@ -1,5 +1,5 @@
 # HTTP Log Snap 配置
-mc:
+newbie:
   http:
     logging:
       enabled: true

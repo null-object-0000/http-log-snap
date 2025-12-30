@@ -5,6 +5,9 @@ import io.github.http.log.snap.HttpRequestLogger;
 import io.github.http.log.snap.formatter.HttpLogFormatter;
 import io.github.http.log.snap.formatter.JsonHttpLogFormatter;
 import io.github.http.log.snap.formatter.TextHttpLogFormatter;
+import io.github.http.log.snap.server.spring.rule.ExcludeRule;
+import io.github.http.log.snap.server.spring.rule.RuleBase;
+import io.github.http.log.snap.server.spring.rule.SseRule;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -109,6 +112,19 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
     private final List<String> excludePatterns = new ArrayList<>();
 
     /**
+     * 条件排除规则（支持 URL + body/header 条件判断）
+     */
+    @Getter
+    private final List<ExcludeRule> excludeRules = new ArrayList<>();
+
+    /**
+     * SSE 响应规则（支持 URL + body/header 条件判断）
+     * 如果匹配规则，则只记录请求报文，不记录响应报文
+     */
+    @Getter
+    private final List<SseRule> sseRules = new ArrayList<>();
+
+    /**
      * 自定义过滤条件（返回 true 表示需要记录日志）
      */
     @Getter
@@ -157,13 +173,68 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
         this.excludePatterns.add(pattern);
     }
 
+    /**
+     * 添加条件排除规则
+     */
+    public void addExcludeRule(ExcludeRule rule) {
+        if (rule != null) {
+            this.excludeRules.add(rule);
+        }
+    }
+
+    /**
+     * 设置条件排除规则列表
+     */
+    public void setExcludeRules(List<ExcludeRule> rules) {
+        this.excludeRules.clear();
+        if (rules != null) {
+            this.excludeRules.addAll(rules);
+        }
+    }
+
+    /**
+     * 添加 SSE 响应规则
+     */
+    public void addSseRule(SseRule rule) {
+        if (rule != null) {
+            this.sseRules.add(rule);
+        }
+    }
+
+    /**
+     * 设置 SSE 响应规则列表
+     */
+    public void setSseRules(List<SseRule> rules) {
+        this.sseRules.clear();
+        if (rules != null) {
+            this.sseRules.addAll(rules);
+        }
+    }
+
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain)
             throws ServletException, IOException {
 
-        // 检查是否需要记录日志
+        // 检查是否需要记录日志（基础 URL 模式检查）
         if (!shouldLog(request)) {
             filterChain.doFilter(request, response);
+            return;
+        }
+
+        // 包装请求和响应以支持多次读取（需要在检查 body 条件之前包装）
+        CachedBodyHttpServletRequest wrappedRequest;
+        try {
+            wrappedRequest = new CachedBodyHttpServletRequest(request);
+        } catch (IOException e) {
+            // 如果包装失败，直接放行
+            filterChain.doFilter(request, response);
+            return;
+        }
+        CachedBodyHttpServletResponse wrappedResponse = new CachedBodyHttpServletResponse(response);
+
+        // 检查条件排除规则（需要 body/header 条件时）
+        if (shouldExcludeByCondition(wrappedRequest)) {
+            filterChain.doFilter(wrappedRequest, wrappedResponse);
             return;
         }
 
@@ -179,10 +250,6 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
         if (customizer != null) {
             customizer.customize(logger, request);
         }
-
-            // 包装请求和响应以支持多次读取
-            CachedBodyHttpServletRequest wrappedRequest = new CachedBodyHttpServletRequest(request);
-            CachedBodyHttpServletResponse wrappedResponse = new CachedBodyHttpServletResponse(response);
 
         try {
             // 开始记录
@@ -203,15 +270,24 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
                 throw e;
         } finally {
             try {
-                // 确保响应数据已完全写入缓存
-                try {
-                    wrappedResponse.ensureFlushed();
-                } catch (IOException e) {
-                    // 忽略 flush 异常，继续记录
-                }
+                // 检查是否匹配 SSE 规则（只记录请求，不记录响应）
+                boolean shouldSkipResponse = shouldSkipResponseBySseRule(wrappedRequest, wrappedResponse);
                 
-                // 记录响应信息（无论成功还是异常都记录）
-                recordResponse(logger, wrappedResponse);
+                if (!shouldSkipResponse) {
+                    // 确保响应数据已完全写入缓存
+                    try {
+                        wrappedResponse.ensureFlushed();
+                    } catch (IOException e) {
+                        // 忽略 flush 异常，继续记录
+                    }
+                    
+                    // 记录响应信息（无论成功还是异常都记录）
+                    recordResponse(logger, wrappedResponse);
+                } else {
+                    // 匹配 SSE 规则，只记录请求，不记录响应
+                    // 记录一个简化的响应信息（仅状态码）
+                    recordSseResponse(logger, wrappedResponse);
+                }
 
                 // 结束记录
                 logger.end();
@@ -238,6 +314,125 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
 
         // 检查自定义条件
         return shouldLog.test(request);
+    }
+
+    /**
+     * 检查是否需要根据条件排除规则排除该请求
+     * 此方法在 request 被包装后调用，可以访问 body 和 header
+     */
+    protected boolean shouldExcludeByCondition(CachedBodyHttpServletRequest request) {
+        String uri = request.getRequestURI();
+        
+        for (ExcludeRule rule : excludeRules) {
+            if (rule.getUrlPattern() == null) {
+                continue;
+            }
+            
+            // 首先检查 URL 是否匹配
+            if (!matchesPattern(uri, rule.getUrlPattern())) {
+                continue;
+            }
+            
+            // URL 匹配后，检查 body 条件
+            if (rule.getBodyCondition() != null) {
+                try {
+                    String body = request.getCachedBodyString();
+                    if (rule.getBodyCondition().test(body)) {
+                        return true; // 排除
+                    }
+                } catch (IOException e) {
+                    // 读取 body 失败，跳过 body 条件检查
+                }
+            }
+            
+            // 检查 header 条件
+            if (rule.getHeaderCondition() != null) {
+                Enumeration<String> headerNames = request.getHeaderNames();
+                while (headerNames.hasMoreElements()) {
+                    String headerName = headerNames.nextElement();
+                    String headerValue = request.getHeader(headerName);
+                    RuleBase.HeaderCondition condition = 
+                        new RuleBase.HeaderCondition(headerName, headerValue);
+                    if (rule.getHeaderCondition().test(condition)) {
+                        return true; // 排除
+                    }
+                }
+            }
+            
+            // 如果 URL 匹配但没有设置 body 和 header 条件，则排除（保持向后兼容）
+            if (rule.getBodyCondition() == null && rule.getHeaderCondition() == null) {
+                return true; // 排除
+            }
+        }
+        
+        return false;
+    }
+
+    /**
+     * 检查是否需要根据 SSE 规则跳过响应记录
+     * 此方法在 request 和 response 都被包装后调用
+     */
+    protected boolean shouldSkipResponseBySseRule(CachedBodyHttpServletRequest request, CachedBodyHttpServletResponse response) {
+        String uri = request.getRequestURI();
+        
+        for (SseRule rule : sseRules) {
+            if (rule.getUrlPattern() == null) {
+                continue;
+            }
+            
+            // 首先检查 URL 是否匹配
+            if (!matchesPattern(uri, rule.getUrlPattern())) {
+                continue;
+            }
+            
+            // URL 匹配后，检查 body 条件
+            if (rule.getBodyCondition() != null) {
+                try {
+                    String body = request.getCachedBodyString();
+                    if (rule.getBodyCondition().test(body)) {
+                        return true; // 跳过响应记录
+                    }
+                } catch (IOException e) {
+                    // 读取 body 失败，跳过 body 条件检查
+                }
+            }
+            
+            // 检查 header 条件
+            if (rule.getHeaderCondition() != null) {
+                Enumeration<String> headerNames = request.getHeaderNames();
+                while (headerNames.hasMoreElements()) {
+                    String headerName = headerNames.nextElement();
+                    String headerValue = request.getHeader(headerName);
+                    RuleBase.HeaderCondition condition = 
+                        new RuleBase.HeaderCondition(headerName, headerValue);
+                    if (rule.getHeaderCondition().test(condition)) {
+                        return true; // 跳过响应记录
+                    }
+                }
+            }
+            
+            // 如果 URL 匹配但没有设置 body 和 header 条件，则跳过响应记录
+            if (rule.getBodyCondition() == null && rule.getHeaderCondition() == null) {
+                return true; // 跳过响应记录
+            }
+        }
+        
+        return false;
+    }
+
+    /**
+     * 记录 SSE 响应信息（仅记录状态码，不记录响应体）
+     */
+    protected void recordSseResponse(HttpRequestLogger logger, CachedBodyHttpServletResponse response) {
+        HttpLogData.Response responseData = new HttpLogData.Response();
+        
+        // 基本信息
+        responseData.setCode(response.getStatus());
+        responseData.setMessage(getStatusMessage(response.getStatus()));
+        
+        // 不记录响应头、响应体等信息
+        logger.recordResponseBuild(responseData);
+        logger.recordResponseCommitted();
     }
 
     /**

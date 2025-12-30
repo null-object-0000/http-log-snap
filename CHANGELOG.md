@@ -37,7 +37,7 @@
 #### Spring Boot 自动配置增强
 - **新增 `includeEvents` 配置项**：支持通过配置文件控制是否包含完整的事件序列
   ```yaml
-  mc:
+  newbie:
     http:
       logging:
         include-events: true  # 开启后会在 timing.events 中记录所有事件的详细信息

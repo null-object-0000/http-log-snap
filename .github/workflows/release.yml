@@ -213,6 +213,7 @@ jobs:
           mvn clean deploy \
             -DskipTests=false \
             -Dmaven.test.skip=false \
+            -Dgpg.skip=false \
             -Dgpg.useagent=false \
             -DaltSnapshotDeploymentRepository=central::default::https://s01.oss.sonatype.org/content/repositories/snapshots \
             -DaltReleaseDeploymentRepository=central::default::https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/

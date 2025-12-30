@@ -20,6 +20,8 @@
 - 🔗 **URL 规范化** - 自动将路径中的数字 ID 替换为占位符，降低监控系统标签基数
 - 🎯 **零侵入** - 不改业务代码，Filter/EventListener 即插即用
 - 🔧 **可扩展** - 格式化器、输出目标、适配器全部可定制
+- 🎛️ **灵活过滤** - 支持基于 URL + body/header 条件的智能排除规则，JSON 表达式过滤
+- 📡 **SSE 支持** - 针对 SSE 流式响应提供专门规则，只记录请求不记录响应体
 
 ## 📦 安装
 
@@ -81,7 +83,7 @@ logger.log();
 
 ```yaml
 # application.yml
-mc:
+newbie:
   http:
     logging:
       enabled: true
@@ -243,7 +245,7 @@ HttpRequestLogger.setDefaultOutput(CompositeLogOutput.of(
 
 ```yaml
 # Spring Boot 自动配置（application.yml）
-mc:
+newbie:
   http:
     logging:
       max-payload-length: 512000  # 512KB（单位：字节，-1 表示无限制）
@@ -254,6 +256,34 @@ mc:
 HttpLoggingFilter filter = new HttpLoggingFilter();
 filter.setMaxPayloadLength(512 * 1024); // 512KB
 ```
+
+**条件排除规则（高级功能）：**
+
+支持基于 URL + body/header 条件的灵活排除规则，包括 JSON 表达式过滤：
+
+```yaml
+newbie:
+  http:
+    logging:
+      enabled: true
+      exclude-patterns:              # 简单排除：直接排除 URL 模式
+        - /actuator/**
+        - /health
+      exclude-rules:                  # 条件排除：URL 匹配 + body/header 条件
+        - url-pattern: /api/webhook
+          body-json-expression: "stream == true"  # JSON 表达式过滤
+        - url-pattern: /api/test
+          header-name: X-Skip-Log
+          header-value: "true"
+      sse-rules:                     # SSE 响应规则：只记录请求，不记录响应
+        - url-pattern: /api/events/**
+        - url-pattern: /api/stream/**
+        - url-pattern: /api/notifications
+          header-name: Accept
+          header-value-contains: "text/event-stream"
+```
+
+> 💡 **提示：** 更多条件排除规则和 SSE 响应规则配置，请查看 [高级用法文档](docs/advanced.md#sse-响应规则)
 
 **URL 规范化（降低监控标签基数）：**
 
