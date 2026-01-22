@@ -5,7 +5,24 @@
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 版本号遵循 [Semantic Versioning](https://semver.org/lang/zh-CN/)。
 
-## [0.0.11] - 2028-12-30
+## [0.0.13] - 2026-01-22
+
+### 🐛 修复
+
+- **修复 multipart 请求处理问题**：修复了 `HttpLoggingFilter` 在处理 `multipart/form-data` 请求时导致的 `MissingServletRequestPartException` 错误
+  - 对于 multipart 请求，跳过请求包装，直接使用原始请求，确保 Spring 能够正确解析文件上传等 multipart 数据
+
+---
+
+## [0.0.12] - 2025-12-30
+
+### ✨ 新增功能
+
+- **SSE 响应规则支持**：新增 SSE（Server-Sent Events）流式响应规则，支持针对 SSE 长连接流式传输的特殊处理
+
+---
+
+## [0.0.11] - 2025-12-30
 
 ### ✨ 新增功能
 
