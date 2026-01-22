@@ -221,21 +221,36 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
             return;
         }
 
+        // 检查是否为 multipart 请求（文件上传等）
+        // multipart 请求不能包装，否则会导致 Spring 无法解析 multipart 数据
+        boolean isMultipart = isMultipartRequest(request);
+        
         // 包装请求和响应以支持多次读取（需要在检查 body 条件之前包装）
-        CachedBodyHttpServletRequest wrappedRequest;
-        try {
-            wrappedRequest = new CachedBodyHttpServletRequest(request);
-        } catch (IOException e) {
-            // 如果包装失败，直接放行
-            filterChain.doFilter(request, response);
-            return;
-        }
+        // 注意：multipart 请求不包装，直接使用原始请求
+        CachedBodyHttpServletRequest wrappedRequest = null;
         CachedBodyHttpServletResponse wrappedResponse = new CachedBodyHttpServletResponse(response);
+        
+        if (!isMultipart) {
+            try {
+                wrappedRequest = new CachedBodyHttpServletRequest(request);
+            } catch (IOException e) {
+                // 如果包装失败，直接放行
+                filterChain.doFilter(request, response);
+                return;
+            }
+        } else {
+            // multipart 请求使用原始请求，不包装
+            wrappedRequest = null;
+        }
 
         // 检查条件排除规则（需要 body/header 条件时）
-        if (shouldExcludeByCondition(wrappedRequest)) {
-            filterChain.doFilter(wrappedRequest, wrappedResponse);
-            return;
+        // 对于 multipart 请求，暂时跳过条件排除规则（因为需要读取 body，而 multipart 请求不能包装）
+        // 如果需要支持，可以后续改进
+        if (!isMultipart && wrappedRequest != null) {
+            if (shouldExcludeByCondition(wrappedRequest)) {
+                filterChain.doFilter(wrappedRequest, wrappedResponse);
+                return;
+            }
         }
 
         // 创建日志记录器（服务端模式）
@@ -256,22 +271,33 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
             logger.start();
 
             // 记录请求信息
-            recordRequest(logger, wrappedRequest);
+            if (isMultipart) {
+                // multipart 请求使用原始请求记录（不记录请求体，因为通常很大且包含二进制数据）
+                recordRequestForMultipart(logger, request);
+            } else {
+                recordRequest(logger, wrappedRequest);
+            }
 
             // 执行过滤器链
             // 注：Handler 的 start/end/exception 由 HttpLoggingHandlerInterceptor 记录
-                filterChain.doFilter(wrappedRequest, wrappedResponse);
+            // multipart 请求使用原始请求，非 multipart 请求使用包装后的请求
+            HttpServletRequest requestToUse = isMultipart ? request : wrappedRequest;
+            filterChain.doFilter(requestToUse, wrappedResponse);
 
-            } catch (Exception e) {
+        } catch (Exception e) {
             // 记录异常
-                if (logger.getException() == null) {
-                    logger.recordHandlerException(e);
-                }
-                throw e;
+            if (logger.getException() == null) {
+                logger.recordHandlerException(e);
+            }
+            throw e;
         } finally {
             try {
                 // 检查是否匹配 SSE 规则（只记录请求，不记录响应）
-                boolean shouldSkipResponse = shouldSkipResponseBySseRule(wrappedRequest, wrappedResponse);
+                // multipart 请求暂不支持 SSE 规则检查
+                boolean shouldSkipResponse = false;
+                if (!isMultipart && wrappedRequest != null) {
+                    shouldSkipResponse = shouldSkipResponseBySseRule(wrappedRequest, wrappedResponse);
+                }
                 
                 if (!shouldSkipResponse) {
                     // 确保响应数据已完全写入缓存
@@ -369,10 +395,57 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
     }
 
     /**
+     * 检查是否为 multipart 请求（文件上传等）
+     */
+    protected boolean isMultipartRequest(HttpServletRequest request) {
+        String contentType = request.getContentType();
+        return contentType != null && contentType.toLowerCase().startsWith("multipart/");
+    }
+
+    /**
+     * 记录 multipart 请求信息（不记录请求体，因为通常很大且包含二进制数据）
+     */
+    protected void recordRequestForMultipart(HttpRequestLogger logger, HttpServletRequest request) {
+        HttpLogData.Request requestData = new HttpLogData.Request();
+
+        // 基本信息
+        requestData.setMethod(request.getMethod());
+        String url = buildRequestUrl(request);
+        requestData.setUrl(url);
+        requestData.setUrlWithoutQuery(HttpLogData.Request.extractUrlWithoutQuery(url));
+        requestData.setProtocol(request.getProtocol());
+
+        // 请求头
+        if (includeHeaders) {
+            requestData.setHeaders(buildHeaders(request));
+        }
+
+        // Content-Type
+        if (request.getContentType() != null) {
+            requestData.setContentType(parseContentType(request.getContentType()));
+        }
+
+        // Content-Length
+        if (request.getContentLength() > 0) {
+            requestData.setContentLength((long) request.getContentLength());
+        }
+
+        // 记录请求已接收
+        logger.recordRequestReceived(requestData);
+
+        // multipart 请求不记录请求体（通常很大且包含二进制数据）
+        // 如果需要记录，可以后续改进
+    }
+
+    /**
      * 检查是否需要根据 SSE 规则跳过响应记录
      * 此方法在 request 和 response 都被包装后调用
      */
     protected boolean shouldSkipResponseBySseRule(CachedBodyHttpServletRequest request, CachedBodyHttpServletResponse response) {
+        if (request == null) {
+            // multipart 请求暂不支持 SSE 规则检查
+            return false;
+        }
         String uri = request.getRequestURI();
         
         for (SseRule rule : sseRules) {
