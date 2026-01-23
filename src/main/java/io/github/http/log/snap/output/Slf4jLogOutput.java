@@ -17,6 +17,7 @@ public class Slf4jLogOutput implements HttpLogOutput {
 
     private final Logger logger;
     private final LogLevel level;
+    private final LogLevel errorLevel;
 
     /**
      * 日志级别
@@ -26,39 +27,61 @@ public class Slf4jLogOutput implements HttpLogOutput {
     }
 
     /**
-     * 使用默认日志记录器和 INFO 级别
+     * 使用默认日志记录器和 INFO 级别（异常时使用 ERROR 级别）
      */
     public Slf4jLogOutput() {
-        this(log, LogLevel.INFO);
+        this(log, LogLevel.INFO, LogLevel.ERROR);
     }
 
     /**
-     * 使用指定的日志级别
+     * 使用指定的日志级别（异常时使用 ERROR 级别）
      */
     public Slf4jLogOutput(LogLevel level) {
-        this(log, level);
+        this(log, level, LogLevel.ERROR);
     }
 
     /**
-     * 使用指定的日志记录器名称
+     * 使用指定的正常日志级别和异常日志级别
+     */
+    public Slf4jLogOutput(LogLevel level, LogLevel errorLevel) {
+        this(log, level, errorLevel);
+    }
+
+    /**
+     * 使用指定的日志记录器名称（异常时使用 ERROR 级别）
      */
     public Slf4jLogOutput(String loggerName) {
-        this(LoggerFactory.getLogger(loggerName), LogLevel.INFO);
+        this(LoggerFactory.getLogger(loggerName), LogLevel.INFO, LogLevel.ERROR);
     }
 
     /**
-     * 使用指定的日志记录器名称和级别
+     * 使用指定的日志记录器名称和级别（异常时使用 ERROR 级别）
      */
     public Slf4jLogOutput(String loggerName, LogLevel level) {
-        this(LoggerFactory.getLogger(loggerName), level);
+        this(LoggerFactory.getLogger(loggerName), level, LogLevel.ERROR);
     }
 
     /**
-     * 使用指定的日志记录器和级别
+     * 使用指定的日志记录器名称、正常日志级别和异常日志级别
+     */
+    public Slf4jLogOutput(String loggerName, LogLevel level, LogLevel errorLevel) {
+        this(LoggerFactory.getLogger(loggerName), level, errorLevel);
+    }
+
+    /**
+     * 使用指定的日志记录器和级别（异常时使用 ERROR 级别）
      */
     public Slf4jLogOutput(Logger logger, LogLevel level) {
+        this(logger, level, LogLevel.ERROR);
+    }
+
+    /**
+     * 使用指定的日志记录器、正常日志级别和异常日志级别
+     */
+    public Slf4jLogOutput(Logger logger, LogLevel level, LogLevel errorLevel) {
         this.logger = logger;
         this.level = level;
+        this.errorLevel = errorLevel;
     }
 
     @Override
@@ -84,7 +107,7 @@ public class Slf4jLogOutput implements HttpLogOutput {
 
     @Override
     public void outputError(@NonNull HttpLogData data, @NonNull String formattedLog, @NonNull Throwable error) {
-        switch (level) {
+        switch (errorLevel) {
             case TRACE:
                 logger.trace(formattedLog, error);
                 break;
